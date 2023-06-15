@@ -1,15 +1,9 @@
 # import networkx as nx
-from scipy.spatial import distance
-from scipy import stats
 import numpy as np
-import pandas as pd
 from scipy import sparse
-import plotly.express as px
 import nodevectors
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numba as nb
-from src.libne.DynWalks import DynWalks
+from GloDyNE_src.libne.DynWalks import DynWalks
 import networkx as nx
 
 

@@ -1,19 +1,11 @@
 # %%
 """Originally cloned from https://github.com/iggallagher/Miscellaneous"""
-import airportsdata
-import pycountry
-from matplotlib.patches import Patch
-import matplotlib
-from sklearn.manifold import MDS
 from math import comb
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
-import time
 import numpy as np
-import csv
 import scipy.sparse as sparse
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from embedding_functions import *
 # %%
 
