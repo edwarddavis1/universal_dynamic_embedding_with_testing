@@ -119,6 +119,7 @@ def compute_diss_matrix(YAs, Z, cont_to_look_at, mat_type="dissimilarity"):
 mat_type = "dissimilarity"
 # mat_type = "p_value"
 
+# Compute dissimilarity or p-value matrix for each continent
 for cont_to_look_at in ["EU", "NA", "AS", "SA", "OC", "AF"]:
     diss_matrix = compute_diss_matrix(
         YAs, Z, cont_to_look_at, mat_type=mat_type)
@@ -166,11 +167,9 @@ def plot_dendrogram(model, labels, **kwargs):
 
 
 # setting distance_threshold=0 ensures we compute the full tree.
-
 model = AgglomerativeClustering(
     distance_threshold=0, compute_full_tree=True, n_clusters=None,
 )
-
 model = model.fit(diss_matrix)
 
 plt.rcParams.update({'font.size': 14})
@@ -179,10 +178,8 @@ months = ["January", "February", "March", "April", "May", "June",
           "July", "August", "September", "October", "November", "December"]
 labels = np.core.defchararray.add(np.array(months * 3),
                                   np.repeat([" 2019", " 2020", " 2021"], 12))
-
 plot_dendrogram(model, truncate_mode="level", p=15,
                 labels=labels, orientation="left")
-
 plt.yticks(rotation=0)
 
 # Add red labels for outliers
@@ -258,7 +255,7 @@ labels = np.core.defchararray.add(np.array(months * 3),
 mats = [compute_diss_matrix(YAs, Z, cont_to_look_at=continents[i])
         for i in range(len(conts_title))]
 
-# plot p-value matrices
+# plot matrices
 fig, axs = plt.subplots(3, 2, figsize=(20, 22))
 for i in range(len(conts_title)):
     ax = axs[i % 3, i//3]

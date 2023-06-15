@@ -14,6 +14,26 @@ import networkx as nx
 
 
 def GloDyNE(As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, sparse_matrix=False):
+    """
+    Computes a dynamic embedding using GloDyNE
+    https://ieeexplore.ieee.org/abstract/document/9302718
+
+    Requires following the below instructions to install GloDyNE
+    https://github.com/houchengbin/GloDyNE
+
+    Inputs
+    As: numpy array of an adjacency matrix series of shape (T, n, n)
+    d: embedding dimension
+    limit: alpha (defined in the paper)
+    num_walks: number of walks per node
+    walklen: length of each walk
+    window: window size for skipgram
+    scheme: scheme 4 for METIS based node selecting approach; scheme 1-3 for other approaches
+    sparse_matrix: whether the adjacency matrices are sparse
+
+    Output
+    ya: dynamic embedding of shape (n*T, d)
+    """
     T = len(As)
     n = As[0].shape[0]
     graphs = []
@@ -23,7 +43,6 @@ def GloDyNE(As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, spa
         else:
             graphs.append(nx.from_numpy_array(As[t]))
 
-    # Limit is alpha in the paper
     model = DynWalks(G_dynamic=graphs, limit=limit, num_walks=num_walks, walk_length=walklen, window=window,
                      emb_dim=d, negative=5, workers=32, seed=2019, scheme=scheme)
     ya_raw = model.sampling_traning()
@@ -37,9 +56,21 @@ def GloDyNE(As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, spa
 
 
 def SSE(As, d, flat=True, procrustes=False, consistent_orientation=True):
-    """Computes separate spectral embeddings for each adjacency snapshot"""
+    """
+    Computes separate spectral embeddings (a.k.a. independent specrtal embedding, ISE) 
+    for each adjacency snapshot
 
-    # Assume fixed n over time
+    Inputs
+    As: numpy array of an adjacency matrix series of shape (T, n, n)
+    d: embedding dimension
+    flat: whether to return a flat embedding (n*T, d) or a 3D embedding (T, n, d)
+    procrustes: whether to align each embedding with the previous embedding
+    consistent_orientation: whether to ensure the eigenvector orientation is consistent
+
+    Output
+    YA: dynamic embedding of shape (n*T, d) or (T, n, d)
+    """
+
     n = As[0].shape[0]
     T = len(As)
 
@@ -91,31 +122,23 @@ def SSE(As, d, flat=True, procrustes=False, consistent_orientation=True):
     return(YA)
 
 
-def single_spectral(A, d, seed=None):
-    if seed is not None:
-        UA, SA, VAt = sparse.linalg.svds(A, d, random_state=seed)
-    else:
-        UA, SA, VAt = sparse.linalg.svds(A, d)
-
-    VA = VAt.T
-    idx = SA.argsort()[::-1]
-    VA = VA[:, idx]
-    UA = UA[:, idx]
-    SA = SA[idx]
-    XA = UA @ np.diag(np.sqrt(SA))
-    return XA
-
-
-def sparse_stack(As):
-    A = As[0]
-    T = len(As)
-    for t in range(1, T):
-        A = sparse.hstack((A, As[t]))
-    return A
-
-
 def UASE(As, d, flat=True, sparse_matrix=False, return_left=False):
-    """Computes the unfolded adjacency spectral embedding"""
+    """
+    Computes the unfolded adjacency spectral embedding (UASE)
+    https://arxiv.org/abs/2007.10455
+    https://arxiv.org/abs/2106.01282
+
+    Inputs
+    As: numpy array of an adjacency matrix series of shape (T, n, n)
+    d: embedding dimension
+    flat: whether to return a flat embedding (n*T, d) or a 3D embedding (T, n, d)
+    sparse_matrix: whether the adjacency matrices are sparse
+    return_left: whether to return the left (anchor) embedding as well as the right (dynamic) embedding
+
+    Output
+    YA: dynamic embedding of shape (n*T, d) or (T, n, d)
+    (optional) XA: anchor embedding of shape (n, d)
+    """
     # Assume fixed n over time
     n = As[0].shape[0]
     T = len(As)
@@ -152,8 +175,26 @@ def UASE(As, d, flat=True, sparse_matrix=False, return_left=False):
         return XA, YA
 
 
-def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen=30, verbose=False, sparse_matrix=False):
-    """Computes an independent node2vec embedding for each adjacency snapshot"""
+def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen=30, verbose=False):
+    """
+    Computes an independent node2vec embedding for each adjacency snapshot
+
+    Requires nodevectors: https://github.com/VHRanger/nodevectors
+
+    Inputs
+    As: numpy array of an adjacency matrix series of shape (T, n, n)
+    d: embedding dimension
+    p: return parameter for node2vec
+    q: in-out parameter for node2vec
+    flat: whether to return a flat embedding (n*T, d) or a 3D embedding (T, n, d)
+    num_walks: number of random walks per node
+    window: window size for word2vec
+    walklen: length of each random walk
+    verbose: whether to print progress
+
+    Output
+    YA: dynamic embedding of shape (n*T, d) or (T, n, d)
+    """
 
     # Assume fixed n over time
     n = As[0].shape[0]
@@ -195,10 +236,30 @@ def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen
 
 
 def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False, num_walks=20, window=10, walklen=30, verbose=False, return_left=False):
-    """Computes the unfolded node2vec embedding"""
+    """
+    Computes the unfolded node2vec embedding (node2vec computed on the dialted unfolded matrix)
 
-    # TODO would like to be able to give rectangular matrices but this won't work in that case
-    # Assume fixed n over time
+    Requires nodevectors: https://github.com/VHRanger/nodevectors
+
+    Inputs
+    As: numpy array of an adjacency matrix series of shape (T, n, n)
+    d: embedding dimension
+    p: return parameter for node2vec
+    q: in-out parameter for node2vec
+    sparse_matrix: whether the adjacency matrices are sparse
+    flat: whether to return a flat embedding (n*T, d) or a 3D embedding (T, n, d)
+    two_hop: whether to use a two-hop dilated unfolded adjacency matrix or not
+    num_walks: number of random walks per node
+    window: window size for word2vec
+    walklen: length of each random walk
+    verbose: whether to print progress
+    return_left: whether to return the left (anchor) embedding as well as the right (dynamic) embedding
+
+    Output
+    YA: dynamic embedding of shape (n*T, d) or (T, n, d)
+    (optional) XA: anchor embedding of shape (n, d)
+    """
+
     n = As[0].shape[0]
     T = len(As)
 
@@ -215,10 +276,6 @@ def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False,
             A = As[0, :, :]
             for t in range(1, T):
                 A = np.block([A, As[t]])
-    # T = len(As)
-    # A = As[0]
-    # for t in range(1, T):
-    #     A = sparse.hstack((A, As[t]))
 
     # Construct the dilated unfolded adjacency matrix
     DA = sparse.bmat([[None, A], [A.T, None]])
@@ -256,113 +313,6 @@ def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False,
         return YA
     else:
         return XA, YA
-
-
-def regularised_unfolded_n2v(As, d, regulariser='auto', p=1, q=1, sparse_matrix=False, flat=True, two_hop=False, num_walks=20, window=10, walklen=30, verbose=False):
-    """Computes the unfolded node2vec embedding"""
-
-    # TODO would like to be able to give rectangular matrices but this won't work in that case
-    # Assume fixed n over time
-    n = As[0].shape[0]
-    T = len(As)
-
-    # Construct the rectangular unfolded adjacency
-    if sparse_matrix:
-        A = As[0]
-        for t in range(1, T):
-            A = sparse.hstack((A, As[t]))
-    else:
-        if len(As.shape) == 2:
-            As = np.array([As[:, :]])
-        if len(As.shape) == 3:
-            T = len(As)
-            A = As[0, :, :]
-            for t in range(1, T):
-                A = np.block([A, As[t]])
-
-    Ls = to_laplacian(A, regulariser=regulariser)
-
-    # Construct the dilated unfolded adjacency matrix
-    DA = sparse.bmat([[None, Ls], [Ls.T, None]])
-    DA = sparse.csr_matrix(DA)
-
-    # Compute node2vec
-    n2v_obj = nodevectors.Node2Vec(
-        n_components=d,
-        epochs=num_walks,
-        walklen=walklen,
-        return_weight=1/p,
-        neighbor_weight=1/q,
-        verbose=verbose,
-        w2vparams={"window": window, "negative": 5, "iter": 10,
-                   "batch_words": 128}
-    )
-    if two_hop:
-        DA = DA @ DA.T
-
-    n2v = n2v_obj.fit_transform(DA)
-
-    # Take the rows of the embedding corresponding to the right embedding
-    # ([0:n] will be left embedding)
-    right_n2v = n2v[n:, :]
-
-    if flat:
-        YA = right_n2v
-    else:
-        YA = np.zeros((T, n, d))
-        for t in range(T):
-            YA[t] = right_n2v[t * n:(t + 1) * n, 0:d]
-
-    return YA
-
-
-def unfolded_prone(As, d, p=1, q=1, flat=True, two_hop=False, sparse_matrix=False):
-    """Computes the unfolded prone embedding"""
-
-    # Assume fixed n over time
-    n = As[0].shape[0]
-    T = len(As)
-
-    # Construct the rectangular unfolded adjacency
-    if sparse_matrix:
-        A = As[0]
-        for t in range(1, T):
-            A = sparse.hstack((A, As[t]))
-    else:
-        if len(As.shape) == 2:
-            As = np.array([As[:, :]])
-        if len(As.shape) == 3:
-            T = len(As)
-            A = As[0, :, :]
-            for t in range(1, T):
-                A = np.block([A, As[t]])
-
-    # Construct the dilated unfolded adjacency matrix
-    DA = sparse.bmat([[None, A], [A.T, None]])
-    DA = sparse.csr_matrix(DA)
-
-    # Compute node2vec
-    n2v_obj = nodevectors.ProNE(
-        n_components=d,
-        verbose=False,
-    )
-    if two_hop:
-        DA = DA @ DA.T
-
-    n2v = n2v_obj.fit_transform(DA)
-
-    # Take the rows of the embedding corresponding to the right embedding
-    # ([0:n] will be left embedding)
-    right_n2v = n2v[n:, :]
-
-    if flat:
-        YA = right_n2v
-    else:
-        YA = np.zeros((T, n, d))
-        for t in range(T):
-            YA[t] = right_n2v[t * n:(t + 1) * n, 0:d]
-
-    return YA
 
 
 def safe_inv_sqrt(a, tol=1e-12):
@@ -416,13 +366,6 @@ def regularised_ULSE(As, d, regulariser=0, flat=True, sparse_matrix=False, retur
         for t in range(1, T):
             A = np.hstack((A, As[t]))
 
-        # if len(As.shape) == 2:
-        #     A = np.array([As[:, :]])
-        # elif len(As.shape) == 3:
-        #     T = len(As)
-        #     A = As[0, :, :]
-        #     for t in range(1, T):
-        #         A = np.block([A, As[t]])
     # Construct (regularised) Laplacian matrix
     L = to_laplacian(A, regulariser=regulariser, verbose=verbose)
 
@@ -447,20 +390,10 @@ def regularised_ULSE(As, d, regulariser=0, flat=True, sparse_matrix=False, retur
 
 @nb.njit()
 def form_omni_matrix(As, n, T):
+    """
+    Forms the embedding matrix for the omnibus embedding
+    """
     A = np.zeros((T*n, T*n))
-
-    for t1 in range(T):
-        for t2 in range(T):
-            if t1 == t2:
-                A[t1*n:(t1+1)*n, t1*n:(t1+1)*n] = As[t1]
-            else:
-                A[t1*n:(t1+1)*n, t2*n:(t2+1)*n] = (As[t1] + As[t2])/2
-
-    return(A)
-
-
-def form_omni_matrix_sparse(As, n, T):
-    A = sparse.lil_matrix((T*n, T*n))
 
     for t1 in range(T):
         for t2 in range(T):
