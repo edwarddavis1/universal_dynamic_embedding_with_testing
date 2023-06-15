@@ -7,10 +7,18 @@ import numba as nb
 def make_temporal_simple(n, T=2, move_prob=0.53, K=2):
     """
     Generates a series of nxn adjacency matrices where one of two communities has constant behaviour
-    over two time points. 
+    over two time points and the other moves (when move_prob != 0.53). 
 
-    An embedding method with temporal exchangeability should detect this stable
-    cluster.
+    Inputs
+    n: number of nodes
+    T: number of time points
+    move_prob: within-community edge probability for the moving community for the second time point (initially 0.5)
+    K: number of communities
+
+    Outputs
+    As: Series of adjacency matrices (T, n, n)
+    tau: Community assignments (n)
+    changepoint: Time point at which the moving community changes
     """
 
     # Ensure equal community sizes
@@ -87,14 +95,21 @@ def get_power_weights(n, max_exp_deg, w_param=6, beta=2.5):
 def make_iid(n, T=2, iid_prob=0.4):
     """
     Generates a series of nxn i.i.d. stochastic block model adjacency matrices
+
+    Inputs
+    n: number of nodes
+    T: number of time points
+    iid_prob: within-community edge probability for one of the communities (0.5 means the two are indisinguishable)
+
+    Outputs
+    As: Series of adjacency matrices (T, n, n)
+    tau: Community assignments (n)
+    changepoint: Middle of the series (variable exists to be in line with the other functions)
     """
-    # Community labels stay the same
-    K = 2
 
     # Random assingment of two equal sized communities
     tau = np.array([0] * int(n/2) + [1] * int(n/2))
     np.random.shuffle(tau)
-    # tau = np.random.choice(K, n)
 
     # Generate B matrix
     B = np.array([[0.5, 0.5], [0.5, iid_prob]])
@@ -121,11 +136,16 @@ def make_iid(n, T=2, iid_prob=0.4):
 @nb.njit()
 def make_merge(n, T=2):
     """
-    Generates a series of nxn adjacency matrices where one of two communities has constant behaviour
-    over two time points. 
+    Generates a series of nxn adjacency matrices where two initially separate communities merge
 
-    An embedding method with temporal exchangeability should detect this stable
-    cluster.
+    Inputs
+    n: number of nodes
+    T: number of time points
+
+    Outputs
+    As: Series of adjacency matrices (T, n, n)
+    tau: Community assignments (n)
+    changepoint: Time point at which the communities merge
     """
     K = 2
 
@@ -242,6 +262,9 @@ def get_B_for_exp(experiment, T=2, move_prob=0.53, K=2, power_move_prob=0.97):
 
 @nb.njit()
 def form_omni_matrix(As, n, T):
+    """
+    Forms the embedding matrix for the omnibus embedding
+    """
     A = np.zeros((T*n, T*n))
 
     for t1 in range(T):
@@ -283,7 +306,16 @@ def get_embedding_dimension(P_list, method):
 @nb.njit()
 def make_iid_close_power(n, T=2, max_exp_deg=6, beta=2.5, change_prob=0.9, w_param=6):
     """
-    Generates a series of nxn i.i.d. stochastic block model adjacency matrices
+    Generates a series of nxn i.i.d. stochastic block model adjacency matrices with a power law distribution of weights
+
+    Inputs
+    n: number of nodes
+    T: number of time steps
+    max_exp_deg, beta, w_param: parameters for the power law distribution
+    change_prob: intercommunity edge probabilities (before applying power law distribution)
+
+    Outputs
+    As: list of adjacency matrices
     """
 
     # Generate weights according to a power law distribution with 2 < beta < 3
