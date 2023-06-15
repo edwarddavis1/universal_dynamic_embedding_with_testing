@@ -169,22 +169,22 @@ euro_c5_mat = euro_c5[[
 # binaryize as we only care about if there are restrictions or not
 euro_c5_mat[euro_c5_mat > 0] = 1
 
-# Weight the c5 of each country by the number of flights from that country
-weighted_c5 = euro_c5_mat
-weighted_c5_sum = np.sum(weighted_c5, axis=0)
-weighted_c5_dates = [col for col in euro_c5.columns if "20" in col]
+# Get the number of european countries with restrictions for each day
+euro_c5_sum = np.sum(euro_c5_mat, axis=0)
+euro_c5_dates = [col for col in euro_c5.columns if "20" in col]
 
 # Add 2019 months
-months_2021 = weighted_c5_dates[weighted_c5_dates.index(
-    "01Jan2021"):weighted_c5_dates.index("31Dec2021")+1]
+months_2021 = euro_c5_dates[euro_c5_dates.index(
+    "01Jan2021"):euro_c5_dates.index("31Dec2021")+1]
 months_2019 = [month.replace("2021", "2019") for month in months_2021]
-weighted_c5_dates = months_2019 + weighted_c5_dates
-weighted_c5_sum = np.concatenate(
-    (np.zeros(len(months_2019)), weighted_c5_sum))
+euro_c5_dates = months_2019 + euro_c5_dates
+euro_c5_sum = np.concatenate(
+    (np.zeros(len(months_2019)), euro_c5_sum))
 
 # Remove months after 31Dec2021
-weighted_c5_sum = weighted_c5_sum[:weighted_c5_dates.index("01Jan2022")]
-weighted_c5_dates = weighted_c5_dates[:weighted_c5_dates.index("01Jan2022")]
+# Now have the number of european countries with restrictions for each day between 01Jan2019 and 31Dec2021
+euro_c5_sum = euro_c5_sum[:euro_c5_dates.index("01Jan2022")]
+euro_c5_dates = euro_c5_dates[:euro_c5_dates.index("01Jan2022")]
 
 # %%
 #############################
@@ -236,22 +236,22 @@ cbar.ax.xaxis.set_label_position('bottom')
 for edge, spine in ax[0, 0].spines.items():
     spine.set_visible(False)
 
-# C5 plot
-weighted_c5_months = [date[0:2] + " " + abbrev_to_month[date[2:5]] +
-                      " " + date[5:] for date in weighted_c5_dates][::-1]
-_ = ax[0, 1].plot(weighted_c5_sum, weighted_c5_months)
+# C5 plot (match x-axis with that of the dissimilarity plot)
+euro_c5_months = [date[0:2] + " " + abbrev_to_month[date[2:5]] +
+                  " " + date[5:] for date in euro_c5_dates][::-1]
+_ = ax[0, 1].plot(euro_c5_sum, euro_c5_months)
 ax[0, 1].set_xlabel(
     "Number of European\nCountries with Public\nTransport Restrictions")
 
 # Manually set ticks
 c5_tick_labels = []
-for i in range(len(weighted_c5_months)):
-    if weighted_c5_months[i][0:2] == "01":
+for i in range(len(euro_c5_months)):
+    if euro_c5_months[i][0:2] == "01":
         c5_tick_labels.append(i)
 
 
 _ = ax[0, 1].set_yticks(np.array(c5_tick_labels[::2]),
-                        np.array(weighted_c5_months)[c5_tick_labels][::-1][::2], rotation=0)
+                        np.array(euro_c5_months)[c5_tick_labels][::-1][::2], rotation=0)
 _ = ax[0, 1].set_yticklabels([])
 _ = ax[0, 1].set_ylim((1110, 14))
 _ = ax[0, 1].grid()
@@ -282,7 +282,7 @@ plt.subplots_adjust(hspace=0.7)
 plt.gca().xaxis.set_major_locator(plt.NullLocator())
 
 # save
-# plt.savefig("saved_flight_stuff/eu_matrix_with_covid_regulations.pdf",
-#             dpi=300, bbox_inchdes='tight', pad_inches=0)
+plt.savefig("saved_flight_plots/eu_matrix_with_covid_regulations.pdf",
+            dpi=300, bbox_inchdes='tight', pad_inches=0)
 
 # %%
