@@ -56,9 +56,9 @@ python experiments.py --methods "URLSE" --experiments "moving-static-community" 
 
 > URLSE had power 0.035
 
-python experiments.py --methods "URLSE" --experiments "moving-community" --check-types "community"
+python experiments.py --methods "URLSE" --experiments "moving-community" --check-types "graph"
 
-> URLSE had power 0.85
+> URLSE had power 0.57
 
 ```
 
@@ -125,16 +125,14 @@ This computation gives both a time-invariant anchor embedding (first $n$ rows) a
 
 ## Simulated Dynamic Network Systems
 
-| System | DSBM Matrix | Description |
+| System | Description | Ideal Testing Power at 5% Level |
 | --- | --- | --- |
-| Static | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.4 \end{bmatrix} = \mathbf{B}^{(2)}\end{equation}</div> | Both communities are static |
-| Moving | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.5 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.53 \end{bmatrix}\end{equation}</div> | Community 2 changes, community 1 is static |
-| Merge | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.9 & 0.2 \\ 0.2 & 0.1 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.5 \end{bmatrix}\end{equation}</div> | Community 1 and 2 merge over time |
-| System | Probability Matrix | Description |
-| --- | --- | --- |
-| Static with Power Dist. | <div class="math">\begin{equation}\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k} = \mathbf{P}^{(2)}\end{equation}</div> | Static sparse network |
-| Moving with Power Dist. | <div class="math">\begin{equation}\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k} \\ \mathbf{P}^{(2)} = 0.97 \left(\mathbf{w w}^\top/\sum_k{\mathbf{w}_k} \right)\end{equation}</div> | Changing sparse network |
-
+| ```static``` | Two static communities. | 0.05 |
+| ```moving-community``` | Community 2 changes, community 1 is static. The moving community is selected for testing. | 1 |
+| ```moving-static-community``` | Community 2 changes, community 1 is static. The static community is selected for testing. | 0.05 |
+| ```merge``` | Community 1 and 2 merge over time. | 0.05 |
+| ```power-static``` | Static sparse network with a single community. | 0.05 |
+| ```power-moving``` | Changing sparse network with a single community. | 1 |
 
 # References
 [1] Ian Gallagher, Andrew Jones, and Patrick Rubin-Delanchy. Spectral embedding for dynamic
