@@ -1,2 +1,4 @@
 *.png
 *flightlist_*
+.vscode
+__pycache__
