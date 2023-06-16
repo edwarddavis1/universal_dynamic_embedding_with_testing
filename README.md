@@ -38,39 +38,26 @@ We consider the following datasets in this analysis.
 This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \mathbb{R}^{n \times d}$, which we refer to as embedding time points. Methods in **bold** are stable dynamic embedding methods.
 
 ### Spectral Embedding Methods
-- [**Unfolded adjacency spectral embedding (UASE)**](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [2,3].
+- [**Unfolded adjacency spectral embedding (UASE)**](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [1,2].
 - **Unfolded Regularised Laplacian Spectral Embedding (URLSE)**: computes a spectral embedding the matrix, 
-$ \begin{equation}\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2} \end{equation} $,
+$\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2},$
 where $\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right)$ and $\mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right)$ are the left and right degree matrices and $\gamma$ is a regularisation parameter.
-- [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [1].
+- [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [3].
 - Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consistent to remove random flipping between embedding time points. We additionally add the option of aligning subsequent embedding time points via a Procrustes rotation.
 
 ### Skip-gram Embedding Methods
 - **Unfolded node2vec**: Computes a node2vec embedding on the $(n + nT) \times (n + n T)$ dilated unfolded adjacency matrix,
 $
-\begin{equation}
 \mathbf{A} = \begin{bmatrix}
 \mathbf{0} & \mathcal{A} \\ \mathcal{A}^\top & \mathbf{0}
 \end{bmatrix}.
-\end{equation}
 $
 This computation gives both a time-invariant anchor embedding (first $n$ rows) and a time-varying dynamic embedding (remaining $nT$ rows).
 - [GloDyNE](https://ieeexplore.ieee.org/abstract/document/9302718): The method aims to preserve global topology by only updating a subset of nodes which accumulate the largest topological changes over subsequent network snapshots. Then, to compute an embedding at $t$, its training is initialised using the pre-trained weights of the SGNS at $t-1$ in order to keep the time points similar [4].
 - [Independent node2vec](https://dl.acm.org/doi/abs/10.1145/2939672.2939754): Computes each  $\hat{\mathbf{Y}}^{(t)}$ as an independent static node2vec embedding [5].
 
 # References
-[1] Keith Levin, Avanti Athreya, Minh Tang, Vince Lyzinski, Youngser Park, and Carey E
-Priebe. A central limit theorem for an omnibus embedding of multiple random graphs
-and implications for multiscale network inference. arXiv preprint arXiv:1705.09355, 2017.
-```
-@article{levin2017central,
-  title={A central limit theorem for an omnibus embedding of multiple random graphs and implications for multiscale network inference},
-  author={Levin, Keith and Athreya, Avanti and Tang, Minh and Lyzinski, Vince and Park, Youngser and Priebe, Carey E},
-  journal={arXiv preprint arXiv:1705.09355},
-  year={2017}
-}
-```
-[2] Ian Gallagher, Andrew Jones, and Patrick Rubin-Delanchy. Spectral embedding for dynamic
+[1] Ian Gallagher, Andrew Jones, and Patrick Rubin-Delanchy. Spectral embedding for dynamic
 networks with stability guarantees. Advances in Neural Information Processing Systems,
 34:10158–10170, 2021.
 ```
@@ -83,7 +70,7 @@ networks with stability guarantees. Advances in Neural Information Processing Sy
   year={2021}
 }
 ```
-[3] Andrew Jones and Patrick Rubin-Delanchy. The multilayer random dot product graph.
+[2] Andrew Jones and Patrick Rubin-Delanchy. The multilayer random dot product graph.
 arXiv preprint arXiv:2007.10455, 2020.
 ```
 @article{jones2020multilayer,
@@ -91,6 +78,17 @@ arXiv preprint arXiv:2007.10455, 2020.
   author={Jones, Andrew and Rubin-Delanchy, Patrick},
   journal={arXiv preprint arXiv:2007.10455},
   year={2020}
+}
+```
+[3] Keith Levin, Avanti Athreya, Minh Tang, Vince Lyzinski, Youngser Park, and Carey E
+Priebe. A central limit theorem for an omnibus embedding of multiple random graphs
+and implications for multiscale network inference. arXiv preprint arXiv:1705.09355, 2017.
+```
+@article{levin2017central,
+  title={A central limit theorem for an omnibus embedding of multiple random graphs and implications for multiscale network inference},
+  author={Levin, Keith and Athreya, Avanti and Tang, Minh and Lyzinski, Vince and Park, Youngser and Priebe, Carey E},
+  journal={arXiv preprint arXiv:1705.09355},
+  year={2017}
 }
 ```
 
