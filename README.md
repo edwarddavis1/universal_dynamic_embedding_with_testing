@@ -31,8 +31,6 @@ We consider the following datasets in this analysis.
 ```python
 >>> from embedding_functions import *
 >>> from experiment_setup import *
->>> import networkx as nx
->>> import numpy as np
 >>> 
 >>> # Generate random dynamic network where community one moves half way through
 >>> n = 100
