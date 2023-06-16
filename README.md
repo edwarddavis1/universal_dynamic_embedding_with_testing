@@ -10,6 +10,8 @@ This code has been tested using Python 3.8.10. To install the required packages 
 pip install -r requirements.txt
 ```
 
+We also include the [GloDyNE](https://github.com/houchengbin/GloDyNE) embedding, for which the [METIS package](https://github.com/networkx/networkx-metis) is required.
+
 ## Data
 
 We consider the following datasets in this analysis.
