@@ -4,7 +4,7 @@ This repository implements a collection of spectral and skip-gram dynamic networ
 
 ## Getting Started
 
-This code has been tested using python 3.8.10. To install the required packages for this repo use the following command.
+This code has been tested using Python 3.8.10. To install the required packages for this repo use the following command.
 
 ```
 pip install -r requirements.txt
@@ -24,21 +24,21 @@ We consider the following datasets in this analysis.
 - ```embedding_functions.py```: Contains functions for several spectral and skip-gram dynamic embedding methods (listed below). Also contains functions to perform hypothesis testing on a dynamic embedding.
 
 **Simulated experiments and testing**
-- ```experiment_setup.py```: Contains functions to generate of various dynamic networks with planted structure. 
+- ```experiment_setup.py```: Contains functions to generate various dynamic networks with planted structure. 
 - ```experiments.py```: Checks if various dynamic embedding methods can encode planted structure through the use of a hypothesis test. For each, a cumulative p-value distribution is plot and coloured based on if the dynamic embedding correctly encoded the planted structure or not. The plots are coloured green if correct, red if incorrect and blue if correct but the test was conservative.
 
 
 **Flight Network Analysis**:
 - ```prep_flight_data.py```: Generates a sparse adjacency series and labelled node set from the [OpenSky](https://zenodo.org/record/5815448#.Y1_ydy-l1hD) network. 
-- ```flight_network_analysis.py```: Computes a dynamic embedding of the [OpenSky](https://zenodo.org/record/5815448#.Y1_ydy-l1hD) network. Follow-up analysis on this embedding includes the generation of dissimilarity and p-value matrices to study the encoded temporal structure of the network, and heirarchical clustering. 
+- ```flight_network_analysis.py```: Computes a dynamic embedding of the [OpenSky](https://zenodo.org/record/5815448#.Y1_ydy-l1hD) network. Follow-up analysis on this embedding includes the generation of dissimilarity and p-value matrices to study the encoded temporal structure of the network and hierarchical clustering. 
 - ```flight_and_c5_regulations.py```: Produces a neat plot of the dissimilarity and p-value matrices to compare the encoded temporal structure of the network to a plot of travel restrictions in Europe in response to the COVID-19 pandemic. There are two waves of dissimilarity in the dissimilarity matrix which line up with the two main European waves of the pandemic.
 
 ## Dynamic Embedding Methods
 
-This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \mathbb{R}^{n \times d}$, which we refer to as embedding time points. Methods in **bold** are stable dynamic embedding methods.
+This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of the snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \mathbb{R}^{n \times d}$, which we refer to as embedding time points. Methods in **bold** are stable dynamic embedding methods.
 
 ### Spectral Embedding Methods
-- [**Unfolded adjacency spectral embedding (UASE)**](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [1,2].
+- [**Unfolded adjacency spectral embedding (UASE)**](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through the right SVD embedding [1,2].
 - **Unfolded Regularised Laplacian Spectral Embedding (URLSE)**: computes a spectral embedding the matrix, 
 
 ```math
@@ -47,7 +47,7 @@ This repository implements a collection of spectral and skip-gram dynamic embedd
 
 where  
 ```math
-\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right), \mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right).
+\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right), \mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right),
 ```
 are the left and right degree matrices and $\gamma$ is a regularisation parameter.
 - [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [3].
@@ -130,3 +130,4 @@ and data mining, pages 855–864, 2016.
   year={2016}
 }
 ```
+
