@@ -20,7 +20,7 @@ We consider the following datasets in this analysis.
 
 ## Dynamic Embedding Methods
 
-This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hb{Y}^{(1)}, \dots, \hb{Y}^{(T)} \in \R^{n \times d}$, which we refer to as embedding time points.
+This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \R^{n \times d}$, which we refer to as embedding time points.
 
 ### Spectral
 - Independent spectral embedding (ISE): Each $\hb{Y}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consisten to remove random flipping between embedding time points. We additioanlly add the option of aligning subsequent embedding time points via a procrustes rotation.
@@ -31,14 +31,34 @@ This repository implements a collection of spectral and skip-gram dynamic embedd
 [1] Keith Levin, Avanti Athreya, Minh Tang, Vince Lyzinski, Youngser Park, and Carey E
 Priebe. A central limit theorem for an omnibus embedding of multiple random graphs
 and implications for multiscale network inference. arXiv preprint arXiv:1705.09355, 2017.
-```@article{omni,
+```
+@article{levin2017central,
   title={A central limit theorem for an omnibus embedding of multiple random graphs and implications for multiscale network inference},
   author={Levin, Keith and Athreya, Avanti and Tang, Minh and Lyzinski, Vince and Park, Youngser and Priebe, Carey E},
   journal={arXiv preprint arXiv:1705.09355},
   year={2017}
-}```
+}
+```
 [2] Ian Gallagher, Andrew Jones, and Patrick Rubin-Delanchy. Spectral embedding for dynamic
 networks with stability guarantees. Advances in Neural Information Processing Systems,
 34:10158–10170, 2021.
-
-[3]
+```
+@article{gallagher2021spectral,
+  title={Spectral embedding for dynamic networks with stability guarantees},
+  author={Gallagher, Ian and Jones, Andrew and Rubin-Delanchy, Patrick},
+  journal={Advances in Neural Information Processing Systems},
+  volume={34},
+  pages={10158--10170},
+  year={2021}
+}
+```
+[3] Andrew Jones and Patrick Rubin-Delanchy. The multilayer random dot product graph.
+arXiv preprint arXiv:2007.10455, 2020.
+```
+@article{jones2020multilayer,
+  title={The multilayer random dot product graph},
+  author={Jones, Andrew and Rubin-Delanchy, Patrick},
+  journal={arXiv preprint arXiv:2007.10455},
+  year={2020}
+}
+```
