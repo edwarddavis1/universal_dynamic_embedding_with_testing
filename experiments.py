@@ -7,24 +7,40 @@ import matplotlib.pyplot as plt
 from embedding_functions import *
 import gc
 from tqdm import tqdm
+
 # %%
 
 # # Dynamic embedding methods to run
-methods = ["URLSE", "UASE", "OMNI", "SSE", "SSE Procrustes",
-           "GloDyNE", "Unfolded Node2Vec", "Independent Node2Vec"]
+methods = [
+    "URLSE",
+    "UASE",
+    "OMNI",
+    "SSE",
+    "SSE Procrustes",
+    "GloDyNE",
+    "Unfolded Node2Vec",
+    "Independent Node2Vec",
+]
 
 # Experiments to run
-experiments_to_run = ["IID", "simple stable", "simple moving",
-                      "merge", "IID-spatial", "power moving", "power IID"]
+experiments_to_run = [
+    "IID",
+    "simple stable",
+    "simple moving",
+    "merge",
+    "IID-spatial",
+    "power moving",
+    "power IID",
+]
 
 # Run tests at graph, community or node level
 check_type_list = ["community", "graph", "node"]
 
 # Generated network parameters
-T = 2       # Number of time points
+T = 2  # Number of time points
 
 # If the generated network is moving, control how much it moves
-move_prob = 0.53        # For moving system. Prob is initially 0.5
+move_prob = 0.53  # For moving system. Prob is initially 0.5
 power_move_prob = 0.97  # For power moving system. Prob is initially 1
 
 n_runs = 200  # Number of p-values to compute for p-value distribution
@@ -33,7 +49,6 @@ save_dir = "saved_experiment_dataframes/"
 
 # Generates a set of p-values for each method on each experiment and saves them as a dataframe
 for check_run_num, check_type in enumerate(check_type_list):
-
     # If testing at the node level, increase the number of time points
     if check_type == "node":
         T_for_exp = 50
@@ -41,11 +56,10 @@ for check_run_num, check_type in enumerate(check_type_list):
         T_for_exp = T
 
     for exp_run_num, exp in enumerate(experiments_to_run):
-
         # If testing on power-distributed examples, we require more nodes
         if "power" in exp:
             n = 2000
-            regulariser = 'auto'  # For URLSE. This setting works well on power-distributed examples
+            regulariser = "auto"  # For URLSE. This setting works well on power-distributed examples
         else:
             n = 200
             regulariser = 10
@@ -54,8 +68,9 @@ for check_run_num, check_type in enumerate(check_type_list):
         dim_for_embedding_dict = {}
         for method in methods:
             # Get SBM matrix for experiment
-            B = get_B_for_exp(exp, T_for_exp, move_prob=move_prob,
-                              power_move_prob=power_move_prob)
+            B = get_B_for_exp(
+                exp, T_for_exp, move_prob=move_prob, power_move_prob=power_move_prob
+            )
 
             # Get the rank of the embedding matrix for each method
             d_for_method = get_embedding_dimension(B, method)
@@ -64,7 +79,6 @@ for check_run_num, check_type in enumerate(check_type_list):
         p_hat_list = []
         print("Experiment: {}\nCheck Type: {}\n".format(exp, check_type))
         for current_run in tqdm(range(n_runs)):
-
             # Generate the selected system
             As, tau, clust_to_check, changepoint = make_experiment(
                 exp, n, T_for_exp, move_prob=move_prob
@@ -74,63 +88,68 @@ for check_run_num, check_type in enumerate(check_type_list):
             embeddings_dict = {}
             for method in methods:
                 d = dim_for_embedding_dict[method]
-                YA_embedding = embed(As, d, method, q=1,
-                                     regulariser=regulariser, window=3, walklen=15, num_walks=20)
+                YA_embedding = embed(
+                    As,
+                    d,
+                    method,
+                    q=1,
+                    regulariser=regulariser,
+                    window=3,
+                    walklen=15,
+                    num_walks=20,
+                )
                 embeddings_dict[method] = YA_embedding
 
             # Select time and node sets for temporal tests
             if exp not in ["merge", "IID-spatial"]:
-
                 # Node sets
                 if check_type == "community":
-                    node_set_1 = np.where(
-                        np.tile(tau, changepoint) == clust_to_check)
+                    node_set_1 = np.where(np.tile(tau, changepoint) == clust_to_check)
                 elif check_type == "node":
                     node_to_check = np.where(tau == clust_to_check)[0][0]
                     node_set_1 = np.where(
-                        np.tile(np.arange(0, n), changepoint) == node_to_check)
+                        np.tile(np.arange(0, n), changepoint) == node_to_check
+                    )
                 elif check_type in ["graph"]:
                     # Selects all idx available once the time sets have been applied
-                    node_set_1 = np.arange(0, n*changepoint)
+                    node_set_1 = np.arange(0, n * changepoint)
                 else:
-                    raise ValueError(
-                        "Check type not recognised")
+                    raise ValueError("Check type not recognised")
 
                 node_set_2 = node_set_1
 
                 # Time sets
-                time_set_1 = np.arange(0, changepoint*n)
-                time_set_2 = np.arange(n*changepoint, n*T_for_exp)
+                time_set_1 = np.arange(0, changepoint * n)
+                time_set_2 = np.arange(n * changepoint, n * T_for_exp)
 
             # Select time and node sets for spatial tests
             else:
                 # Node sets
                 if check_type == "community":
-                    node_set_1 = np.where(
-                        tau == 0)
-                    node_set_2 = np.where(
-                        tau == 1)
+                    node_set_1 = np.where(tau == 0)
+                    node_set_2 = np.where(tau == 1)
                 elif check_type == "node":
                     node_1_to_check = np.where(tau == 0)[0][0]
                     node_set_1 = np.where(
-                        np.tile(np.arange(0, n), changepoint) == node_1_to_check)[0]
+                        np.tile(np.arange(0, n), changepoint) == node_1_to_check
+                    )[0]
                     node_2_to_check = np.where(tau == 1)[0][0]
                     node_set_2 = np.where(
-                        np.tile(np.arange(0, n), T_for_exp-changepoint) == node_2_to_check)[0]
+                        np.tile(np.arange(0, n), T_for_exp - changepoint)
+                        == node_2_to_check
+                    )[0]
                 elif check_type == "graph":
                     print("Cannot compute spatial tests at graph level... skipping")
                     break
                 else:
-                    raise ValueError(
-                        "Check type not recognised")
+                    raise ValueError("Check type not recognised")
 
                 # Time sets
-                time_set_2 = np.arange(n*changepoint, n*T_for_exp)
+                time_set_2 = np.arange(n * changepoint, n * T_for_exp)
                 time_set_1 = time_set_2
 
             # Compute p-values
             for method in methods:
-
                 # Select embedding sets
                 YA_embedding = embeddings_dict[method]
                 ya1 = YA_embedding[time_set_1, :][node_set_1]
@@ -138,7 +157,8 @@ for check_run_num, check_type in enumerate(check_type_list):
 
                 # Paired displacement testing
                 p_hat = test_temporal_displacement_two_times(
-                    np.row_stack([ya1, ya2]), n=ya1.shape[0])
+                    np.row_stack([ya1, ya2]), n=ya1.shape[0]
+                )
 
                 p_hat_list.append(p_hat)
 
@@ -155,7 +175,8 @@ for check_run_num, check_type in enumerate(check_type_list):
             for method in methods:
                 df_to_save = df[df["method"] == method]
                 df_to_save.to_csv(
-                    save_dir + exp + "_" + check_type + "_" + str(method) + ".csv")
+                    save_dir + exp + "_" + check_type + "_" + str(method) + ".csv"
+                )
 
 
 # %%
@@ -172,24 +193,35 @@ experiment_to_plot = "IID"
 experiment_check_type = "graph"
 
 methods_from_save = []
-methods_ordering = ["SSE", "SSE Procrustes", "OMNI", "UASE", "ULSE", "URLSE",
-                    "Independent Node2Vec", "Dynamic Skip Gram", "Unfolded Node2Vec", "GloDyNE"]
+methods_ordering = [
+    "SSE",
+    "SSE Procrustes",
+    "OMNI",
+    "UASE",
+    "ULSE",
+    "URLSE",
+    "Independent Node2Vec",
+    "Dynamic Skip Gram",
+    "Unfolded Node2Vec",
+    "GloDyNE",
+]
 
 # Get the saved dataframes from save folder
 df_list = []
-for (dirpath, dirnames, filenames) in walk(save_dir):
+for dirpath, dirnames, filenames in walk(save_dir):
     for df_file in filenames:
-
         file_check_type = df_file.split("_")[1]
         file_system = df_file.split("_")[0]
 
-        if file_system == experiment_to_plot in df_file and file_check_type == experiment_check_type:
+        if (
+            file_system == experiment_to_plot in df_file
+            and file_check_type == experiment_check_type
+        ):
             df_list.append(pd.read_csv(save_dir + df_file))
             methods_from_save.append(df_file.split("_")[-1].split(".")[0])
             print(df_file)
 
-ordered_methods_from_save = sorted(
-    methods_from_save, key=methods_ordering.index)
+ordered_methods_from_save = sorted(methods_from_save, key=methods_ordering.index)
 
 
 # Plot p-value cumulative distribution
@@ -206,14 +238,18 @@ for i, method in enumerate(ordered_methods_from_save):
 
     # Get the power at the 5% significance level
     power_significance = 0.05
-    power_idx = alphas.index(
-        min(alphas, key=lambda x: abs(x - power_significance)))
+    power_idx = alphas.index(min(alphas, key=lambda x: abs(x - power_significance)))
     power = roc[power_idx]
     print("{}: {}".format(method, power))
 
     # Colour the plot based on if the power is expected for each experiment
     colour_for_plot = None
-    if experiment_to_plot in ["simple moving", "IID-spatial", "power moving", "move_power"] or experiment_to_plot == "simple stable" and experiment_check_type == "graph":
+    if (
+        experiment_to_plot
+        in ["simple moving", "IID-spatial", "power moving", "move_power"]
+        or experiment_to_plot == "simple stable"
+        and experiment_check_type == "graph"
+    ):
         correct_distribution = "alternative"
     else:
         correct_distribution = "uniform"
@@ -245,8 +281,13 @@ for i, method in enumerate(ordered_methods_from_save):
 
     # Plot the distribution
     fig = plt.figure(figsize=(3, 3))
-    plt.plot(np.linspace(0, 1, 2), np.linspace(
-        0, 1, 2), linestyle="--", c="grey", linewidth=5)
+    plt.plot(
+        np.linspace(0, 1, 2),
+        np.linspace(0, 1, 2),
+        linestyle="--",
+        c="grey",
+        linewidth=5,
+    )
     plt.plot(alphas, roc, linewidth=5)
 
     if colour_background:
@@ -259,7 +300,15 @@ for i, method in enumerate(ordered_methods_from_save):
     plt.axis("off")
 
     if save_figs:
-        plt.savefig("saved_experiment_individual_plots_coloured/" +
-                    experiment_to_plot + "_" + experiment_check_type + "_" + method + ".png", bbox_inches='tight')
+        plt.savefig(
+            "saved_experiment_individual_plots_coloured/"
+            + experiment_to_plot
+            + "_"
+            + experiment_check_type
+            + "_"
+            + method
+            + ".png",
+            bbox_inches="tight",
+        )
 
 # %%
