@@ -27,7 +27,7 @@ This repository implements a collection of spectral and skip-gram dynamic embedd
 ### Spectral
 - [Unfolded adjacency spectral embedding (UASE)](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [2,3].
 - Unfolded Regularised Laplacian Spectral Embedding (URLSE): computes a spectral embedding the matrix, 
-$$\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2},$$
+$$ \begin{equation}\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2} \end{equation} $$,
 where $\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right)$ and $\mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right)$ are the left and right degree matrices and $\gamma$ is a regularisation parameter.
 - [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [1].
 - Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consistent to remove random flipping between embedding time points. We additionally add the option of aligning subsequent embedding time points via a Procrustes rotation.
@@ -35,9 +35,11 @@ where $\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}
 ### Skip-gram
 - Unfolded node2vec: Computes a node2vec embedding on the $(n + nT) \times (n + n T)$ dilated unfolded adjacency matrix,
 $$
+\begin{equation}
 \mathbf{A} = \begin{bmatrix}
 \mathbf{0} & \mathcal{A} \\ \mathcal{A}.T & \mathbf{0}
 \end{bmatrix}.
+\end{equation}
 $$
 This computation gives both a time-invariant anchor embedding (first $n$ rows) and a time-varying dynamic embedding (remaining $nT$ rows).
 - [GloDyNE](https://ieeexplore.ieee.org/abstract/document/9302718): The method aims to preserve global topology by only updating a subset of nodes which accumulate the largest topological changes over subsequent network snapshots. Then, to compute an embedding at $t$, its training is initialised using the pre-trained weights of the SGNS at $t-1$ in order to keep the time points similar [4].
