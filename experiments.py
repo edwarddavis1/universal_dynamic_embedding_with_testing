@@ -1,51 +1,122 @@
-# %%
-from os import walk
-from experiment_setup import *
+import os
+import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from embedding_functions import *
 import gc
 from tqdm import tqdm
+from experiment_setup import *
 
 # %%
 
-# # Dynamic embedding methods to run
-methods = [
-    "URLSE",
-    "UASE",
-    "OMNI",
-    "SSE",
-    "SSE Procrustes",
-    "GloDyNE",
-    "Unfolded Node2Vec",
-    "Independent Node2Vec",
-]
+# Parse command line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--methods",
+    nargs="+",
+    default=["URLSE"],
+    help="List of dynamic embedding methods to run. Select from: URLSE, UASE, OMNI, ISE, ISE Procrustes, GloDyNE, Unfolded Node2Vec, Independent Node2Vec",
+)
+parser.add_argument(
+    "--experiments",
+    nargs="+",
+    default=[
+        "moving-static-community",
+    ],
+    help="Select which dynamic network systems to test on. Select from: static, moving-static-community, moving-community, merge, static-spatial, power-moving, power-static",
+)
+parser.add_argument(
+    "--check-types",
+    nargs="+",
+    default=["community"],
+    help="Run experiments at the community, graph, or node level",
+)
+parser.add_argument(
+    "--n_runs",
+    type=int,
+    default=200,
+    help="Number of p-values to compute for each test",
+)
+parser.add_argument(
+    "--n", type=int, default=200, help="Number of nodes in each (non-power) experiment"
+)
+parser.add_argument(
+    "--n-power",
+    type=int,
+    default=2000,
+    help="Number of nodes in each power experiment (reccomend at least 2000)",
+)
+parser.add_argument(
+    "--show-plots",
+    type=bool,
+    default=True,
+    help="Whether to show the plots or not",
+)
+parser.add_argument(
+    "--all",
+    type=bool,
+    default=False,
+    help="Runs all experiments with all methods at all levels.",
+)
+
+
+args = parser.parse_args()
+
+# Create save directory if it doesn't exist
+save_file = True  # Save dataframe of p-values for each method on each experiment
+save_dir_dfs = "saved_experiment_dataframes/"  # Directory to save experiment runs in
+if not os.path.exists(save_dir_dfs):
+    os.makedirs(save_dir_dfs)
+
+save_dir_plots = "saved_experiment_plots/"  # Directory to save plots in
+if not os.path.exists(save_dir_plots):
+    os.makedirs(save_dir_plots)
+
+show_plots = args.show_plots
+run_all = args.all
+
+# Dynamic embedding methods to run
+methods = args.methods
 
 # Experiments to run
-experiments_to_run = [
-    "IID",
-    "simple stable",
-    "simple moving",
-    "merge",
-    "IID-spatial",
-    "power moving",
-    "power IID",
-]
+experiments_to_run = args.experiments
 
 # Run tests at graph, community or node level
-check_type_list = ["community", "graph", "node"]
+check_type_list = args.check_types
+
+if run_all:
+    methods = [
+        "URLSE",
+        "UASE",
+        "OMNI",
+        "ISE",
+        "ISE Procrustes",
+        "GloDyNE",
+        "Unfolded Node2Vec",
+        "Independent Node2Vec",
+    ]
+    experiments_to_run = [
+        "static",
+        "moving-static-community",
+        "moving-community",
+        "merge",
+        "static-spatial",
+        "power-moving",
+        "power-static",
+    ]
+    check_type_list = ["community", "graph", "node"]
 
 # Generated network parameters
 T = 2  # Number of time points
+n_normal = args.n  # Number of nodes in each (non-power) experiment
+n_power = args.n_power  # Number of nodes in each power experiment
 
 # If the generated network is moving, control how much it moves
 move_prob = 0.53  # For moving system. Prob is initially 0.5
-power_move_prob = 0.97  # For power moving system. Prob is initially 1
+power_move_prob = 0.97  # For power-moving system. Prob is initially 1
 
-n_runs = 200  # Number of p-values to compute for p-value distribution
-save_file = True  # Save dataframe of p-values for each method on each experiment
-save_dir = "saved_experiment_dataframes/"
+n_runs = args.n_runs  # Number of p-values to compute for p-value distribution
 
 # Generates a set of p-values for each method on each experiment and saves them as a dataframe
 for check_run_num, check_type in enumerate(check_type_list):
@@ -58,10 +129,10 @@ for check_run_num, check_type in enumerate(check_type_list):
     for exp_run_num, exp in enumerate(experiments_to_run):
         # If testing on power-distributed examples, we require more nodes
         if "power" in exp:
-            n = 2000
+            n = n_power
             regulariser = "auto"  # For URLSE. This setting works well on power-distributed examples
         else:
-            n = 200
+            n = n_normal
             regulariser = 10
 
         # Select the embedding dimension for each method to be the rank of the embedding matrix
@@ -101,7 +172,7 @@ for check_run_num, check_type in enumerate(check_type_list):
                 embeddings_dict[method] = YA_embedding
 
             # Select time and node sets for temporal tests
-            if exp not in ["merge", "IID-spatial"]:
+            if exp not in ["merge", "static-spatial"]:
                 # Node sets
                 if check_type == "community":
                     node_set_1 = np.where(np.tile(tau, changepoint) == clust_to_check)
@@ -175,7 +246,7 @@ for check_run_num, check_type in enumerate(check_type_list):
             for method in methods:
                 df_to_save = df[df["method"] == method]
                 df_to_save.to_csv(
-                    save_dir + exp + "_" + check_type + "_" + str(method) + ".csv"
+                    save_dir_dfs + exp + "_" + check_type + "_" + str(method) + ".csv"
                 )
 
 
@@ -186,16 +257,12 @@ RED = (1, 0.70, 0.70)
 GREY = (0.8, 0.8, 0.8)
 
 colour_background = True
-save_figs = False
-
-# Select experiment to plot
-experiment_to_plot = "IID"
-experiment_check_type = "graph"
+save_figs = True
 
 methods_from_save = []
 methods_ordering = [
-    "SSE",
-    "SSE Procrustes",
+    "ISE",
+    "ISE Procrustes",
     "OMNI",
     "UASE",
     "ULSE",
@@ -206,109 +273,115 @@ methods_ordering = [
     "GloDyNE",
 ]
 
-# Get the saved dataframes from save folder
-df_list = []
-for dirpath, dirnames, filenames in walk(save_dir):
-    for df_file in filenames:
-        file_check_type = df_file.split("_")[1]
-        file_system = df_file.split("_")[0]
+for experiment_to_plot in experiments_to_run:
+    for experiment_check_type in check_type_list:
+        # Get the saved dataframes from save folder
+        df_list = []
+        for dirpath, dirnames, filenames in os.walk(save_dir_dfs):
+            for df_file in filenames:
+                file_check_type = df_file.split("_")[1]
+                file_system = df_file.split("_")[0]
 
-        if (
-            file_system == experiment_to_plot in df_file
-            and file_check_type == experiment_check_type
-        ):
-            df_list.append(pd.read_csv(save_dir + df_file))
-            methods_from_save.append(df_file.split("_")[-1].split(".")[0])
-            print(df_file)
+                if (
+                    file_system == experiment_to_plot in df_file
+                    and file_check_type == experiment_check_type
+                ):
+                    df_list.append(pd.read_csv(save_dir_dfs + df_file))
+                    methods_from_save.append(df_file.split("_")[-1].split(".")[0])
 
-ordered_methods_from_save = sorted(methods_from_save, key=methods_ordering.index)
-
-
-# Plot p-value cumulative distribution
-for i, method in enumerate(ordered_methods_from_save):
-    dfind = df_list[methods_from_save.index(ordered_methods_from_save[i])]
-
-    roc = []
-    alphas = []
-    for alpha in np.linspace(0, 1, len(dfind)):
-        alphas.append(alpha)
-        num_below_alpha = sum(dfind["p_hat"].values < alpha)
-        roc_point = num_below_alpha / len(dfind)
-        roc.append(roc_point)
-
-    # Get the power at the 5% significance level
-    power_significance = 0.05
-    power_idx = alphas.index(min(alphas, key=lambda x: abs(x - power_significance)))
-    power = roc[power_idx]
-    print("{}: {}".format(method, power))
-
-    # Colour the plot based on if the power is expected for each experiment
-    colour_for_plot = None
-    if (
-        experiment_to_plot
-        in ["simple moving", "IID-spatial", "power moving", "move_power"]
-        or experiment_to_plot == "simple stable"
-        and experiment_check_type == "graph"
-    ):
-        correct_distribution = "alternative"
-    else:
-        correct_distribution = "uniform"
-
-    power_threshold = 0.04
-
-    if power >= 0.05 - power_threshold and power <= 0.05 + power_threshold:
-        if correct_distribution == "uniform":
-            # if the distribution is approximately uniform when it should be uniform
-            colour_for_plot = GREEN
-        else:
-            # if the distribution is approximately uniform when it should be super-uniform
-            colour_for_plot = GREY
-    else:
-        # If not uniform, decide whether alternative or conservative
-        if roc[power_idx] > 0.05:
-            # alternative
-            if correct_distribution == "uniform":
-                colour_for_plot = RED
-            else:
-                colour_for_plot = GREEN
-
-        else:
-            # conservative
-            if correct_distribution == "uniform":
-                colour_for_plot = BLUE
-            else:
-                colour_for_plot = RED
-
-    # Plot the distribution
-    fig = plt.figure(figsize=(3, 3))
-    plt.plot(
-        np.linspace(0, 1, 2),
-        np.linspace(0, 1, 2),
-        linestyle="--",
-        c="grey",
-        linewidth=5,
-    )
-    plt.plot(alphas, roc, linewidth=5)
-
-    if colour_background:
-        fig.patch.set_facecolor(colour_for_plot)
-    else:
-        fig.patch.set_alpha(0.0)
-
-    plt.xticks([])
-    plt.yticks([])
-    plt.axis("off")
-
-    if save_figs:
-        plt.savefig(
-            "saved_experiment_individual_plots_coloured/"
-            + experiment_to_plot
-            + "_"
-            + experiment_check_type
-            + "_"
-            + method
-            + ".png",
-            bbox_inches="tight",
+        # Plot p-value cumulative distribution
+        print(
+            "{} network at {} level...".format(
+                experiment_to_plot, experiment_check_type
+            )
         )
+        for i, method in enumerate(methods):
+            dfind = df_list[methods_from_save.index(methods[i])]
 
-# %%
+            roc = []
+            alphas = []
+            for alpha in np.linspace(0, 1, len(dfind)):
+                alphas.append(alpha)
+                num_below_alpha = sum(dfind["p_hat"].values < alpha)
+                roc_point = num_below_alpha / len(dfind)
+                roc.append(roc_point)
+
+            # Get the power at the 5% significance level
+            power_significance = 0.05
+            power_idx = alphas.index(
+                min(alphas, key=lambda x: abs(x - power_significance))
+            )
+            power = roc[power_idx]
+            print("{} had power {}".format(method, power))
+
+            # Colour the plot based on if the power is expected for each experiment
+            colour_for_plot = None
+            if (
+                experiment_to_plot
+                in ["moving-community", "static-spatial", "power-moving", "move_power"]
+                or experiment_to_plot == "moving-static-community"
+                and experiment_check_type == "graph"
+            ):
+                correct_distribution = "alternative"
+            else:
+                correct_distribution = "uniform"
+
+            power_threshold = 0.04
+
+            if power >= 0.05 - power_threshold and power <= 0.05 + power_threshold:
+                if correct_distribution == "uniform":
+                    # if the distribution is approximately uniform when it should be uniform
+                    colour_for_plot = GREEN
+                else:
+                    # if the distribution is approximately uniform when it should be super-uniform
+                    colour_for_plot = GREY
+            else:
+                # If not uniform, decide whether alternative or conservative
+                if roc[power_idx] > 0.05:
+                    # alternative
+                    if correct_distribution == "uniform":
+                        colour_for_plot = RED
+                    else:
+                        colour_for_plot = GREEN
+
+                else:
+                    # conservative
+                    if correct_distribution == "uniform":
+                        colour_for_plot = BLUE
+                    else:
+                        colour_for_plot = RED
+
+            # Plot the distribution
+            fig = plt.figure(figsize=(3, 3))
+            plt.plot(
+                np.linspace(0, 1, 2),
+                np.linspace(0, 1, 2),
+                linestyle="--",
+                c="grey",
+                linewidth=5,
+            )
+            plt.plot(alphas, roc, linewidth=5)
+
+            if colour_background:
+                fig.patch.set_facecolor(colour_for_plot)
+            else:
+                fig.patch.set_alpha(0.0)
+
+            plt.xticks([])
+            plt.yticks([])
+            plt.axis("off")
+
+            if show_plots:
+                plt.show()
+
+            if save_figs:
+                plt.savefig(
+                    save_dir_plots
+                    + experiment_to_plot
+                    + "_"
+                    + experiment_check_type
+                    + "_"
+                    + method
+                    + ".png",
+                    bbox_inches="tight",
+                )

@@ -7,7 +7,9 @@ from GloDyNE_src.libne.DynWalks import DynWalks
 import networkx as nx
 
 
-def GloDyNE(As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, sparse_matrix=False):
+def GloDyNE(
+    As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, sparse_matrix=False
+):
     """
     Computes a dynamic embedding using GloDyNE
     https://ieeexplore.ieee.org/abstract/document/9302718
@@ -37,22 +39,31 @@ def GloDyNE(As, d, limit=0.1, num_walks=20, walklen=30, window=10, scheme=4, spa
         else:
             graphs.append(nx.from_numpy_array(As[t]))
 
-    model = DynWalks(G_dynamic=graphs, limit=limit, num_walks=num_walks, walk_length=walklen, window=window,
-                     emb_dim=d, negative=5, workers=32, seed=2019, scheme=scheme)
+    model = DynWalks(
+        G_dynamic=graphs,
+        limit=limit,
+        num_walks=num_walks,
+        walk_length=walklen,
+        window=window,
+        emb_dim=d,
+        negative=5,
+        workers=32,
+        seed=2019,
+        scheme=scheme,
+    )
     ya_raw = model.sampling_traning()
 
-    ya = np.zeros((n*T, d))
+    ya = np.zeros((n * T, d))
     for t in range(T):
         for i in range(n):
-            ya[i + n*t, :] = ya_raw[t][i]
+            ya[i + n * t, :] = ya_raw[t][i]
 
-    return(ya)
+    return ya
 
 
-def SSE(As, d, flat=True, procrustes=False, consistent_orientation=True):
+def ISE(As, d, flat=True, procrustes=False, consistent_orientation=True):
     """
-    Computes separate spectral embeddings (a.k.a. independent specrtal embedding, ISE) 
-    for each adjacency snapshot
+    Computes independent specrtal embedding, ISE for each adjacency snapshot
 
     Inputs
     As: numpy array of an adjacency matrix series of shape (T, n, n)
@@ -113,7 +124,7 @@ def SSE(As, d, flat=True, procrustes=False, consistent_orientation=True):
         for t in range(T):
             YA[t, :, :] = YA_list[t]
 
-    return(YA)
+    return YA
 
 
 def UASE(As, d, flat=True, sparse_matrix=False, return_left=False):
@@ -161,7 +172,7 @@ def UASE(As, d, flat=True, sparse_matrix=False, return_left=False):
     else:
         YA = np.zeros((T, n, d))
         for t in range(T):
-            YA[t, :, :] = YA_flat[n*t:n*(t+1), :]
+            YA[t, :, :] = YA_flat[n * t : n * (t + 1), :]
 
     if not return_left:
         return YA
@@ -169,7 +180,9 @@ def UASE(As, d, flat=True, sparse_matrix=False, return_left=False):
         return XA, YA
 
 
-def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen=30, verbose=False):
+def independent_n2v(
+    As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen=30, verbose=False
+):
     """
     Computes an independent node2vec embedding for each adjacency snapshot
 
@@ -205,11 +218,10 @@ def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen
             n_components=d_list[t],
             epochs=num_walks,
             walklen=walklen,
-            return_weight=1/p,
-            neighbor_weight=1/q,
+            return_weight=1 / p,
+            neighbor_weight=1 / q,
             verbose=verbose,
-            w2vparams={"window": window, "negative": 5, "iter": 10,
-                       "batch_words": 128}
+            w2vparams={"window": window, "negative": 5, "iter": 10, "batch_words": 128},
         )
         n2v_embed = n2v_obj.fit_transform(As[t])
 
@@ -229,7 +241,20 @@ def independent_n2v(As, d, p=1, q=1, flat=True, num_walks=20, window=10, walklen
     return YA
 
 
-def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False, num_walks=20, window=10, walklen=30, verbose=False, return_left=False):
+def unfolded_n2v(
+    As,
+    d,
+    p=1,
+    q=1,
+    sparse_matrix=False,
+    flat=True,
+    two_hop=False,
+    num_walks=20,
+    window=10,
+    walklen=30,
+    verbose=False,
+    return_left=False,
+):
     """
     Computes the unfolded node2vec embedding (node2vec computed on the dialted unfolded matrix)
 
@@ -280,11 +305,10 @@ def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False,
         n_components=d,
         epochs=num_walks,
         walklen=walklen,
-        return_weight=1/p,
-        neighbor_weight=1/q,
+        return_weight=1 / p,
+        neighbor_weight=1 / q,
         verbose=verbose,
-        w2vparams={"window": window, "negative": 5, "iter": 10,
-                   "batch_words": 128}
+        w2vparams={"window": window, "negative": 5, "iter": 10, "batch_words": 128},
     )
     if two_hop:
         DA = DA @ DA.T
@@ -301,7 +325,7 @@ def unfolded_n2v(As, d, p=1, q=1, sparse_matrix=False, flat=True, two_hop=False,
     else:
         YA = np.zeros((T, n, d))
         for t in range(T):
-            YA[t] = right_n2v[t * n:(t + 1) * n, 0:d]
+            YA[t] = right_n2v[t * n : (t + 1) * n, 0:d]
 
     if not return_left:
         return YA
@@ -320,22 +344,28 @@ def safe_inv_sqrt(a, tol=1e-12):
 
 
 def to_laplacian(A, regulariser=0, verbose=False):
-    """Constructs the (regularised) symmetric Laplacian.
-    """
+    """Constructs the (regularised) symmetric Laplacian."""
     left_degrees = np.reshape(np.asarray(A.sum(axis=1)), (-1,))
     right_degrees = np.reshape(np.asarray(A.sum(axis=0)), (-1,))
-    if regulariser == 'auto':
+    if regulariser == "auto":
         regulariser = np.mean(np.concatenate((left_degrees, right_degrees)))
         if verbose:
             print("Auto regulariser: {}".format(regulariser))
     left_degrees_inv_sqrt = safe_inv_sqrt(left_degrees + regulariser)
     right_degrees_inv_sqrt = safe_inv_sqrt(right_degrees + regulariser)
-    L = sparse.diags(
-        left_degrees_inv_sqrt) @ A @ sparse.diags(right_degrees_inv_sqrt)
+    L = sparse.diags(left_degrees_inv_sqrt) @ A @ sparse.diags(right_degrees_inv_sqrt)
     return L
 
 
-def regularised_ULSE(As, d, regulariser=0, flat=True, sparse_matrix=False, return_left=False, verbose=False):
+def regularised_ULSE(
+    As,
+    d,
+    regulariser=0,
+    flat=True,
+    sparse_matrix=False,
+    return_left=False,
+    verbose=False,
+):
     """Compute the unfolded (regularlised) Laplacian Spectral Embedding
     1. Construct dilated unfolded adjacency matrix
     2. Compute the symmetric (regularised) graph Laplacian
@@ -374,7 +404,7 @@ def regularised_ULSE(As, d, regulariser=0, flat=True, sparse_matrix=False, retur
     else:
         YA = np.zeros((T, n, d))
         for t in range(T):
-            YA[t] = YA_flat[t * n:(t + 1) * n, 0:d]
+            YA[t] = YA_flat[t * n : (t + 1) * n, 0:d]
 
     if not return_left:
         return YA
@@ -387,32 +417,32 @@ def form_omni_matrix(As, n, T):
     """
     Forms the embedding matrix for the omnibus embedding
     """
-    A = np.zeros((T*n, T*n))
+    A = np.zeros((T * n, T * n))
 
     for t1 in range(T):
         for t2 in range(T):
             if t1 == t2:
-                A[t1*n:(t1+1)*n, t1*n:(t1+1)*n] = As[t1]
+                A[t1 * n : (t1 + 1) * n, t1 * n : (t1 + 1) * n] = As[t1]
             else:
-                A[t1*n:(t1+1)*n, t2*n:(t2+1)*n] = (As[t1] + As[t2])/2
+                A[t1 * n : (t1 + 1) * n, t2 * n : (t2 + 1) * n] = (As[t1] + As[t2]) / 2
 
-    return(A)
+    return A
 
 
 def form_omni_matrix_sparse(As, n, T):
     """
     Forms embedding matrix for the omnibus embedding using sparse matrices
     """
-    A = sparse.lil_matrix((T*n, T*n))
+    A = sparse.lil_matrix((T * n, T * n))
 
     for t1 in range(T):
         for t2 in range(T):
             if t1 == t2:
-                A[t1*n:(t1+1)*n, t1*n:(t1+1)*n] = As[t1]
+                A[t1 * n : (t1 + 1) * n, t1 * n : (t1 + 1) * n] = As[t1]
             else:
-                A[t1*n:(t1+1)*n, t2*n:(t2+1)*n] = (As[t1] + As[t2])/2
+                A[t1 * n : (t1 + 1) * n, t2 * n : (t2 + 1) * n] = (As[t1] + As[t2]) / 2
 
-    return(A)
+    return A
 
 
 def OMNI(As, d, flat=True, sparse_matrix=False):
@@ -452,19 +482,31 @@ def OMNI(As, d, flat=True, sparse_matrix=False):
     else:
         XA = np.zeros((T, n, d))
         for t in range(T):
-            XA[t] = XA_flat[t * n:(t + 1) * n, 0:d]
+            XA[t] = XA_flat[t * n : (t + 1) * n, 0:d]
 
     return XA
 
 
-def embed(As, d, method, regulariser=0, p=1, q=1, two_hop=False, verbose=False, num_walks=20, window=10, walklen=30):
+def embed(
+    As,
+    d,
+    method,
+    regulariser=0,
+    p=1,
+    q=1,
+    two_hop=False,
+    verbose=False,
+    num_walks=20,
+    window=10,
+    walklen=30,
+):
     """
     Computes a dynamic embedding using a specified method
     """
-    if method.upper() == "SSE":
-        YA = SSE(As, d)
-    elif method.upper() == "SSE PROCRUSTES":
-        YA = SSE(As, d, procrustes=True)
+    if method.upper() == "ISE":
+        YA = ISE(As, d)
+    elif method.upper() == "ISE PROCRUSTES":
+        YA = ISE(As, d, procrustes=True)
     elif method.upper() == "UASE":
         YA = UASE(As, d)
     elif method.upper() == "OMNI":
@@ -475,15 +517,33 @@ def embed(As, d, method, regulariser=0, p=1, q=1, two_hop=False, verbose=False, 
         YA = regularised_ULSE(As, d, regulariser=regulariser)
     elif method.upper() == "INDEPENDENT NODE2VEC":
         YA = independent_n2v(
-            As, d, p=p, q=q, num_walks=num_walks, window=window, walklen=walklen, verbose=verbose)
+            As,
+            d,
+            p=p,
+            q=q,
+            num_walks=num_walks,
+            window=window,
+            walklen=walklen,
+            verbose=verbose,
+        )
     elif method.upper() == "UNFOLDED NODE2VEC":
-        YA = unfolded_n2v(As, d, p=p, q=q, two_hop=two_hop,
-                          num_walks=num_walks, window=window, walklen=walklen, verbose=verbose)
+        YA = unfolded_n2v(
+            As,
+            d,
+            p=p,
+            q=q,
+            two_hop=two_hop,
+            num_walks=num_walks,
+            window=window,
+            walklen=walklen,
+            verbose=verbose,
+        )
     elif method.upper() == "GLODYNE":
-        YA = GloDyNE(As, d, num_walks=num_walks,
-                     window=window, walklen=walklen)
+        YA = GloDyNE(As, d, num_walks=num_walks, window=window, walklen=walklen)
     else:
-        raise ValueError("Method given is not a recognised embedding method\n- Please select from:\n\t> SSE\n\t> SSE PROCRUSTES\n\t> OMNI\n\t> UASE\n\t> ULSE\n\t> URLSE\n\t> INDEPENDENT NODE2VEC\n\t> UNFOLDED NODE2VEC\n\t> GLODYNE\n")
+        raise ValueError(
+            "Method given is not a recognised embedding method\n- Please select from:\n\t> ISE\n\t> ISE PROCRUSTES\n\t> OMNI\n\t> UASE\n\t> ULSE\n\t> URLSE\n\t> INDEPENDENT NODE2VEC\n\t> UNFOLDED NODE2VEC\n\t> GLODYNE\n"
+        )
 
     return YA
 
@@ -502,13 +562,13 @@ def vector_displacement_test(ya1, ya2):
     # Magnitude of average displacement vector
     t_obs = np.linalg.norm(sum_axis)
 
-    return(t_obs)
+    return t_obs
 
 
 @nb.njit()
 def test_temporal_displacement(ya, n, T, changepoint, n_sim=1000):
     """Computes vector displacement permutation test with temporal permutations
-    Vector displacement is expected to be approximately zero if two sets are from the same distribution and non-zero otherwise. 
+    Vector displacement is expected to be approximately zero if two sets are from the same distribution and non-zero otherwise.
     Temporal permutations only permutes a node embedding at t with its representation at other times.
 
     This function should only be used when comparing more than two time points across a single changepoint.
@@ -526,8 +586,8 @@ def test_temporal_displacement(ya, n, T, changepoint, n_sim=1000):
         raise Exception("Changepoint must be less than or equal T")
 
     # Select time point embedding just before and after the changepoint
-    ya1 = ya[n*(changepoint-1):n*(changepoint), :]
-    ya2 = ya[n*changepoint:n*(changepoint+1), :]
+    ya1 = ya[n * (changepoint - 1) : n * (changepoint), :]
+    ya2 = ya[n * changepoint : n * (changepoint + 1), :]
 
     # Get observed value of the test
     t_obs = vector_displacement_test(ya1, ya2)
@@ -539,27 +599,26 @@ def test_temporal_displacement(ya, n, T, changepoint, n_sim=1000):
         for j in range(n):
             # For each node get its position at each time - permute over these positions
             possible_perms = ya[j::n, :]
-            ya_star[j::n, :] = possible_perms[np.random.choice(
-                T, T, replace=False), :]
+            ya_star[j::n, :] = possible_perms[np.random.choice(T, T, replace=False), :]
 
         # Get permuted value of the test
-        ya_star_1 = ya_star[n*(changepoint-1):n*changepoint, :]
-        ya_star_2 = ya_star[n*changepoint:n*(changepoint+1), :]
+        ya_star_1 = ya_star[n * (changepoint - 1) : n * changepoint, :]
+        ya_star_2 = ya_star[n * changepoint : n * (changepoint + 1), :]
         t_obs_star = vector_displacement_test(ya_star_1, ya_star_2)
         t_obs_stars[sim_iter] = t_obs_star
 
     # Compute permutation test p-value
-    p_hat = 1/n_sim * np.sum(t_obs_stars >= t_obs)
-    return(p_hat)
+    p_hat = 1 / n_sim * np.sum(t_obs_stars >= t_obs)
+    return p_hat
 
 
 @nb.njit()
 def test_temporal_displacement_two_times(ya, n, n_sim=1000):
     """
-    Much faster version of test_temporal_displacement for when there are only two time points    
+    Much faster version of test_temporal_displacement for when there are only two time points
 
     Computes vector displacement permutation test with temporal permutations
-    Vector displacement is expected to be approximately zero if two sets are from the same distribution and non-zero otherwise. 
+    Vector displacement is expected to be approximately zero if two sets are from the same distribution and non-zero otherwise.
     Temporal permutations only permutes a node embedding at t with its representation at other times.
 
     ya: (numpy array (nT, d) Entire dynamic embedding.
@@ -570,7 +629,7 @@ def test_temporal_displacement_two_times(ya, n, n_sim=1000):
 
     # Select time point embedding just before and after the changepoint
     ya1 = ya[0:n, :]
-    ya2 = ya[n:2*n, :]
+    ya2 = ya[n : 2 * n, :]
 
     # Get observed value of the test
     displacement = ya2 - ya1
@@ -580,7 +639,6 @@ def test_temporal_displacement_two_times(ya, n, n_sim=1000):
     # Permute the sets
     t_stars = np.zeros((n_sim))
     for sim_iter in range(n_sim):
-
         # Randomly swap the signs of each row of displacement
         signs = np.random.randint(0, 2, size=displacement.shape) * 2 - 1
         displacement_permuted = displacement * signs
@@ -589,5 +647,5 @@ def test_temporal_displacement_two_times(ya, n, n_sim=1000):
         t_stars[sim_iter] = t_star
 
     # Compute permutation test p-value
-    p_hat = 1/n_sim * np.sum(t_stars >= t_obs)
-    return(p_hat)
+    p_hat = 1 / n_sim * np.sum(t_stars >= t_obs)
+    return p_hat
