@@ -127,15 +127,14 @@ This computation gives both a time-invariant anchor embedding (first $n$ rows) a
 
 | System | DSBM Matrix | Description |
 | --- | --- | --- |
-| ```static``` | ```math\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.4 \end{bmatrix} = \mathbf{B}^{(2)}``` | Both communities are static |
-|  ```moving-static-community``` | ```math\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.5 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.53 \end{bmatrix}``` | Community 2 changes, community 1 is static. Testing is done on the moving community. |
-| ```moving-community``` | ```math\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.5 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.53 \end{bmatrix}``` | Community 2 changes, community 1 is static. Testing is done on the static community |
-| ```merge``` | ```math\mathbf{B}^{(1)} = \begin{bmatrix} 0.9 & 0.2 \\ 0.2 & 0.1 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.5 \end{bmatrix}``` | Community 1 and 2 merge over time |
-
+| Static | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.4 \end{bmatrix} = \mathbf{B}^{(2)}\end{equation}</div> | Both communities are static |
+| Moving | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.5 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.53 \end{bmatrix}\end{equation}</div> | Community 2 changes, community 1 is static |
+| Merge | <div class="math">\begin{equation}\mathbf{B}^{(1)} = \begin{bmatrix} 0.9 & 0.2 \\ 0.2 & 0.1 \end{bmatrix}, \mathbf{B}^{(2)}= \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & 0.5 \end{bmatrix}\end{equation}</div> | Community 1 and 2 merge over time |
 | System | Probability Matrix | Description |
 | --- | --- | --- |
-| ```power-static``` | ```math\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k} = \mathbf{P}^{(2)}``` | Static sparse network |
-| ```power-moving``` | ```math\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k}``` <br> ```\mathbf{P}^{(2)} = 0.97 \left(\mathbf{w w}^\top/\sum_k{\mathbf{w}_k} \right)``` | Changing sparse network |
+| Static with Power Dist. | <div class="math">\begin{equation}\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k} = \mathbf{P}^{(2)}\end{equation}</div> | Static sparse network |
+| Moving with Power Dist. | <div class="math">\begin{equation}\mathbf{P}^{(1)} = \mathbf{w w}^\top/\sum_k{\mathbf{w}_k} \\ \mathbf{P}^{(2)} = 0.97 \left(\mathbf{w w}^\top/\sum_k{\mathbf{w}_k} \right)\end{equation}</div> | Changing sparse network |
+
 
 # References
 [1] Ian Gallagher, Andrew Jones, and Patrick Rubin-Delanchy. Spectral embedding for dynamic
