@@ -45,7 +45,7 @@ This repository implements a collection of spectral and skip-gram dynamic embedd
 \begin{equation}\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2} \end{equation}
 ```
 
-where $\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right)$ and $\mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right)$ are the left and right degree matrices and $\gamma$ is a regularisation parameter.
+where  ```math \mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right)$ and $\mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right)``` are the left and right degree matrices and $\gamma$ is a regularisation parameter.
 - [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [3].
 - Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consistent to remove random flipping between embedding time points. We additionally add the option of aligning subsequent embedding time points via a Procrustes rotation.
 
