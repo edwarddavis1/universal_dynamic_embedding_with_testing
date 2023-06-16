@@ -6,7 +6,9 @@ This repository implements a collection of spectral and skip-gram dynamic networ
 
 This code has been tested using python 3.8.10. To install the required packages for this repo use the following command.
 
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 We implement the [GloDyNE](https://ieeexplore.ieee.org/abstract/document/9302718) embedding, which can be found at the [following](https://github.com/houchengbin/GloDyNE) GitHub.
 
@@ -23,9 +25,23 @@ We consider the following datasets in this analysis.
 This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \mathbb{R}^{n \times d}$, which we refer to as embedding time points.
 
 ### Spectral
-- Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consisten to remove random flipping between embedding time points. We additioanlly add the option of aligning subsequent embedding time points via a procrustes rotation.
-- [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [1].
 - [Unfolded adjacency spectral embedding (UASE)](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [2,3].
+- Unfolded Regularised Laplacian Spectral Embedding (URLSE): computes a spectral embedding the matrix, 
+$$\mathbf{L} = \left(\mathbf{D}_{\text{L}} - \gamma \right)^{-1/2} \mathcal{A} \left(\mathbf{D}_{\text{R}} - \gamma \right)^{-1/2},$$
+where $\mathbf{D}_{\text{L}} = \text{diag}\left(\sum_i^{n}{\mathcal{A}^{\top}_i}\right)$ and $\mathbf{D}_{\text{R}} = \text{diag}\left(\sum_i^{nT}{\mathcal{A}_i}\right)$ are the left and right degree matrices and $\gamma$ is a regularisation parameter.
+- [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [1].
+- Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consistent to remove random flipping between embedding time points. We additionally add the option of aligning subsequent embedding time points via a Procrustes rotation.
+
+### Skip-gram
+- Unfolded node2vec: Computes a node2vec embedding on the $(n + nT) \times (n + n T)$ dilated unfolded adjacency matrix,
+$$
+\mathbf{A} = \begin{bmatrix}
+\mathbf{0} & \mathcal{A} \\ \mathcal{A}.T & \mathbf{0}
+\end{bmatrix}.
+$$
+This computation gives both a time-invariant anchor embedding (first $n$ rows) and a time-varying dynamic embedding (remaining $nT$ rows).
+- [GloDyNE](https://ieeexplore.ieee.org/abstract/document/9302718): The method aims to preserve global topology by only updating a subset of nodes which accumulate the largest topological changes over subsequent network snapshots. Then, to compute an embedding at $t$, its training is initialised using the pre-trained weights of the SGNS at $t-1$ in order to keep the time points similar [4].
+- [Independent node2vec](https://dl.acm.org/doi/abs/10.1145/2939672.2939754): Computes each  $\hat{\mathbf{Y}}^{(t)}$ as an independent static node2vec embedding [5].
 
 # References
 [1] Keith Levin, Avanti Athreya, Minh Tang, Vince Lyzinski, Youngser Park, and Carey E
@@ -60,5 +76,34 @@ arXiv preprint arXiv:2007.10455, 2020.
   author={Jones, Andrew and Rubin-Delanchy, Patrick},
   journal={arXiv preprint arXiv:2007.10455},
   year={2020}
+}
+```
+
+[4] Chengbin Hou, Han Zhang, Shan He, and Ke Tang. Glodyne: Global topology preserving
+dynamic network embedding. IEEE Transactions on Knowledge and Data Engineering,
+2020.
+```
+@article{hou2020glodyne,
+  title={Glodyne: Global topology preserving dynamic network embedding},
+  author={Hou, Chengbin and Zhang, Han and He, Shan and Tang, Ke},
+  journal={IEEE Transactions on Knowledge and Data Engineering},
+  volume={34},
+  number={10},
+  pages={4826--4837},
+  year={2020},
+  publisher={IEEE}
+}
+```
+
+[5] Aditya Grover and Jure Leskovec. node2vec: Scalable feature learning for networks. In
+Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery
+and data mining, pages 855–864, 2016.
+```
+@inproceedings{grover2016node2vec,
+  title={node2vec: Scalable feature learning for networks},
+  author={Grover, Aditya and Leskovec, Jure},
+  booktitle={Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery and data mining},
+  pages={855--864},
+  year={2016}
 }
 ```
