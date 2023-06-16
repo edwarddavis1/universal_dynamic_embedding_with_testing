@@ -339,8 +339,8 @@ ax[1, 1].legend(
 
 
 # reduce distance between subplot columns
-plt.subplots_adjust(wspace=-0.35)
-plt.subplots_adjust(hspace=0.7)
+_ = plt.subplots_adjust(wspace=-0.35)
+_ = plt.subplots_adjust(hspace=0.7)
 
 plt.gca().xaxis.set_major_locator(plt.NullLocator())
 
@@ -348,7 +348,7 @@ plt.gca().xaxis.set_major_locator(plt.NullLocator())
 plt.savefig(
     "saved_flight_plots/eu_matrix_with_covid_regulations.pdf",
     dpi=300,
-    bbox_inchdes="tight",
+    # bbox_inchdes="tight",
     pad_inches=0,
 )
 
