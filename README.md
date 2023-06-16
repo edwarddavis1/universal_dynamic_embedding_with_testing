@@ -20,10 +20,10 @@ We consider the following datasets in this analysis.
 
 ## Dynamic Embedding Methods
 
-This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \R^{n \times d}$, which we refer to as embedding time points.
+This repository implements a collection of spectral and skip-gram dynamic embedding methods. Here, we consider the problem of embedding discrete-time dynamic networks, i.e. those that can be represented as a series of adjacency matrix ``snapshots" over time, $\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)}$. A dynamic embedding is then a low-dimensional representation for each of snapshots in the series, $\hat{\mathbf{Y}}^{(1)}, \dots, \hat{\mathbf{Y}}^{(T)} \in \mathbb{R}^{n \times d}$, which we refer to as embedding time points.
 
 ### Spectral
-- Independent spectral embedding (ISE): Each $\hb{Y}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consisten to remove random flipping between embedding time points. We additioanlly add the option of aligning subsequent embedding time points via a procrustes rotation.
+- Independent spectral embedding (ISE): Each $\hat{\mathbf{Y}}^{(t)}$ is the independent spectral embedding of each $\mathbf{A}^{(t)}$. Here, we add the option to ensure that the eigenvector orientation is consisten to remove random flipping between embedding time points. We additioanlly add the option of aligning subsequent embedding time points via a procrustes rotation.
 - [Omnibus embedding (OMNI)](https://arxiv.org/abs/1705.09355): Constructs a single block matrix containing pairwise-averaged adjacency snapshots, $\mathbf{M}_{s,t} = (\mathbf{A}^{(s)} + \mathbf{A}^{(t)})/2$, and then computes a spectral embedding on this matrix to achieve a dynamic embedding [1].
 - [Unfolded adjacency spectral embedding (UASE)](https://arxiv.org/abs/2007.10455): Constructs a column-concatenated adjacency matrix, $\mathcal{A} = \left[\mathbf{A}^{(1)}, \dots, \mathbf{A}^{(T)} \right]$, called the rectangular unfolded adjacency matrix. The dynamic embedding is then achieved through an right SVD embedding [2,3].
 
