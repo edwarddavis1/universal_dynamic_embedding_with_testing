@@ -1,3 +1,4 @@
+# %%
 import os
 import argparse
 import numpy as np
@@ -385,3 +386,5 @@ for experiment_to_plot in experiments_to_run:
                     + ".png",
                     bbox_inches="tight",
                 )
+
+# %%

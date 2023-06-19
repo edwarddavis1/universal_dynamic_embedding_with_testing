@@ -349,12 +349,24 @@ def make_iid_close_power(n, T=2, max_exp_deg=6, beta=2.5, change_prob=0.9, w_par
 
     W = get_power_weights(n=n, max_exp_deg=max_exp_deg, w_param=w_param, beta=beta)
 
+    # If T is not even, round down T/2 for the changepoint
+    if T % 2 == 0:
+        changepoint = int(T / 2)
+    else:
+        changepoint = int(np.floor(T / 2))
+
     prob_for_times = [1, change_prob]
 
     # Generate adjacency matrices
     As = np.zeros((T, n, n))
-    for t in range(T):
-        P_t = W * prob_for_times[t]
+    for t in range(0, changepoint):
+        P_t = W * prob_for_times[0]
+
+        A_t = np.random.uniform(0, 1, n**2).reshape((n, n)) < P_t
+        As[t] = A_t
+
+    for t in range(changepoint, T):
+        P_t = W * prob_for_times[1]
 
         A_t = np.random.uniform(0, 1, n**2).reshape((n, n)) < P_t
         As[t] = A_t
