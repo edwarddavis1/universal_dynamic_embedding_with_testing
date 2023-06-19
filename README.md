@@ -64,19 +64,20 @@ python experiments.py --methods "URLSE" --experiments "moving-community" --check
 optional arguments:
   -h, --help            show this help message and exit
   --methods METHODS [METHODS ...]
-                        List of dynamic embedding methods to run. Select from: URLSE,
-                        UASE, OMNI, ISE, ISE Procrustes, GloDyNE, Unfolded Node2Vec,
-                        Independent Node2Vec
+                        List of dynamic embedding methods to run. Select from:
+                        URLSE, UASE, OMNI, ISE, ISE Procrustes, GloDyNE,
+                        Unfolded Node2Vec, Independent Node2Vec
   --experiments EXPERIMENTS [EXPERIMENTS ...]
-                        Select which dynamic network systems to test on. Select from:
-                        static, moving-static-community, moving-community, merge,
-                        static-spatial, power-moving, power-static
+                        Select which dynamic network systems to test on.
+                        Select from: static, moving-static-community, moving-
+                        community, merge, static-spatial, power-moving, power-
+                        static
   --check-types CHECK_TYPES [CHECK_TYPES ...]
                         Run experiments at the community, graph, or node level
-  --n_runs N_RUNS       Number of p-values to compute for each test
+  --n-runs N_RUNS       Number of p-values to compute for each test
   --n N                 Number of nodes in each (non-power) experiment
-  --n-power N_POWER     Number of nodes in each power experiment (reccomend at least
-                        2000)
+  --n-power N_POWER     Number of nodes in each power experiment (reccomend at
+                        least 2000)
   --show-plots SHOW_PLOTS
                         Whether to show the plots or not
   --all ALL             Runs all experiments with all methods at all levels.

@@ -34,7 +34,7 @@ parser.add_argument(
     help="Run experiments at the community, graph, or node level",
 )
 parser.add_argument(
-    "--n_runs",
+    "--n-runs",
     type=int,
     default=200,
     help="Number of p-values to compute for each test",
