@@ -249,18 +249,17 @@ def get_B_for_exp(experiment, T=2, move_prob=0.53, K=2, power_move_prob=0.97):
         B[int(T / 2) :] = np.array([[[0.5, 0.5], [0.5, 0.5]]] * int(T / 2))
     elif experiment.upper() in ["POWER-MOVING"]:
         B = np.zeros((T, K, K))
-        B = np.array(
-            [
-                [[1, 1], [1, 1]],
-                [
-                    [power_move_prob, power_move_prob],
-                    [power_move_prob, power_move_prob],
-                ],
-            ]
+
+        B[0 : int(T / 2)] = np.array([[[1, 1], [1, 1]]] * int(T / 2))
+        B[int(T / 2) :] = np.array(
+            [[[power_move_prob, power_move_prob], [power_move_prob, power_move_prob]]]
+            * int(T / 2)
         )
+
     elif experiment.upper() in ["POWER-STATIC"]:
         B = np.zeros((T, K, K))
-        B = np.array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]])
+        B[0 : int(T / 2)] = np.array([[[1, 1], [1, 1]]] * int(T / 2))
+        B[int(T / 2) :] = np.array([[[1, 1], [1, 1]]] * int(T / 2))
     else:
         raise Exception(
             "{} is not a recognised system\n- Please select from:\n\t> STATIC\n\t> MOVING-COMMUNITY\n\t> MOVING-STATIC-COMMUNITY\n\t> POWER-MOVING\n\t> POWER STABLE\n\t> MERGE".format(

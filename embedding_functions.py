@@ -63,7 +63,7 @@ def GloDyNE(
 
 def ISE(As, d, flat=True, procrustes=False, consistent_orientation=True):
     """
-    Computes independent specrtal embedding, ISE for each adjacency snapshot
+    Computes independent specrtal embedding (ISE) for each adjacency snapshot
 
     Inputs
     As: numpy array of an adjacency matrix series of shape (T, n, n)
