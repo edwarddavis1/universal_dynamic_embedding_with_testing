@@ -301,7 +301,7 @@ if not plot_only:
 
 
 # %%
-if show_plots is False or save_file is False:
+if save_file is False:
     sys.exit()
 
 
@@ -332,12 +332,14 @@ for experiment_to_plot in experiments_to_run:
         df_list = []
         for dirpath, dirnames, filenames in os.walk(save_dir_dfs):
             for df_file in filenames:
+                file_method = df_file.split("_")[2][:-4]
                 file_check_type = df_file.split("_")[1]
                 file_system = df_file.split("_")[0]
 
                 if (
                     file_system == experiment_to_plot in df_file
                     and file_check_type == experiment_check_type
+                    and file_method in methods
                 ):
                     df_list.append(pd.read_csv(save_dir_dfs + df_file))
                     methods_from_save.append(df_file.split("_")[-1].split(".")[0])
