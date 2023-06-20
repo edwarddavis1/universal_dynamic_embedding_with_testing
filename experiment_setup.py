@@ -22,7 +22,7 @@ def make_temporal_simple(n, T=2, move_prob=0.53, K=2):
 
     # Ensure equal community sizes
     if n % K != 0:
-        raise Exception("n must be divisible by K")
+        raise ValueError("n must be divisible by the number of communities")
 
     tau = np.repeat(np.arange(0, K), int(n / K))
     np.random.shuffle(tau)
@@ -84,7 +84,9 @@ def get_power_weights(n, max_exp_deg, w_param=6, beta=2.5):
     w_sum = np.sum(w)
 
     if w.max() ** 2 >= np.sum(w):
-        print("WARNING: weights distribution is not sufficient")
+        print(
+            "WARNING: Weights distribution for the power experiment is not sufficient. Try increasing n."
+        )
 
     W = (w.reshape((n, 1)) @ w.reshape((n, 1)).T) / w_sum
     return W
@@ -106,8 +108,12 @@ def make_iid(n, T=2, iid_prob=0.4):
     changepoint: Middle of the series (variable exists to be in line with the other functions)
     """
 
-    # Random assingment of two equal sized communities
-    tau = np.array([0] * int(n / 2) + [1] * int(n / 2))
+    # Ensure equal community sizes
+    K = 2
+    if n % K != 0:
+        raise ValueError("n must be divisible by the number of communities")
+
+    tau = np.repeat(np.arange(0, K), int(n / K))
     np.random.shuffle(tau)
 
     # Generate B matrix
@@ -146,12 +152,13 @@ def make_merge(n, T=2):
     tau: Community assignments (n)
     changepoint: Time point at which the communities merge
     """
-    K = 2
 
-    # Random assingment of two equal sized communities
-    tau = np.array([0] * int(n / 2) + [1] * int(n / 2))
+    K = 2
+    if n % K != 0:
+        raise ValueError("n must be divisible by the number of communities")
+
+    tau = np.repeat(np.arange(0, K), int(n / K))
     np.random.shuffle(tau)
-    # tau = np.random.choice(K, n)
 
     # Generate B matrix
     B_list = np.zeros((2, K, K))

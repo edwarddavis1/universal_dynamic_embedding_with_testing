@@ -2,3 +2,5 @@
 *flightlist_*
 .vscode
 __pycache__
+*saved_experiment_plots/*
+*saved_experiment_dataframes/*
