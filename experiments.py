@@ -311,7 +311,6 @@ RED = (1, 0.70, 0.70)
 GREY = (0.8, 0.8, 0.8)
 
 colour_background = True
-save_figs = True
 
 methods_from_save = []
 methods_ordering = [
@@ -433,20 +432,19 @@ for experiment_to_plot in experiments_to_run:
             plt.yticks([])
             plt.axis("off")
 
+            plt.savefig(
+                save_dir_plots
+                + experiment_to_plot
+                + "_"
+                + experiment_check_type
+                + "_"
+                + method
+                + ".png",
+                bbox_inches="tight",
+            )
+
             if show_plots:
                 plt.show()
-
-            if save_figs:
-                plt.savefig(
-                    save_dir_plots
-                    + experiment_to_plot
-                    + "_"
-                    + experiment_check_type
-                    + "_"
-                    + method
-                    + ".png",
-                    bbox_inches="tight",
-                )
 
             plt.close()
 
