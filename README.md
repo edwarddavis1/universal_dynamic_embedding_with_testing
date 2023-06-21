@@ -10,7 +10,7 @@ This code has been tested using Python 3.8.10. To install the required packages 
 pip install -r requirements.txt
 ```
 
-We also include the [GloDyNE](https://github.com/houchengbin/GloDyNE) embedding, for which the [METIS package](https://github.com/networkx/networkx-metis) is required.
+We also include the [GloDyNE](https://github.com/houchengbin/GloDyNE) embedding, for which the [METIS package](https://github.com/networkx/networkx-metis) is required. If you do not want to install the METIS package, you can use the flag ```--no-glodyne``` when running experiments to avoid using GloDyNE.
 
 
 
@@ -64,21 +64,29 @@ python experiments.py --methods "URLSE" --experiments "moving-community" --check
 optional arguments:
   -h, --help            show this help message and exit
   --methods METHODS [METHODS ...]
-                        List of dynamic embedding methods to run. Select from: URLSE, UASE, OMNI, ISE,
-                        ISE Procrustes, GloDyNE, Unfolded Node2Vec, Independent Node2Vec
+                        List of dynamic embedding methods to run. Select from:
+                        URLSE, UASE, OMNI, ISE, ISE Procrustes, GloDyNE,
+                        Unfolded Node2Vec, Independent Node2Vec
   --experiments EXPERIMENTS [EXPERIMENTS ...]
-                        Select which dynamic network systems to test on. Select from: static, moving-
-                        static-community, moving-community, merge, static-spatial, power-moving, power-
+                        Select which dynamic network systems to test on.
+                        Select from: static, moving-static-community, moving-
+                        community, merge, static-spatial, power-moving, power-
                         static
   --check-types CHECK_TYPES [CHECK_TYPES ...]
                         Run experiments at the community, graph, or node level
   --n-runs N_RUNS       Number of p-values to compute for each test
   --n N                 Number of nodes in each (non-power) experiment
-  --n-power N_POWER     Number of nodes in each power experiment (reccomend at least 2000)
-  --all                 Runs all experiments with all methods at all check types.
+  --n-power N_POWER     Number of nodes in each power experiment (reccomend at
+                        least 2000)
+  --all                 Runs all experiments with all methods at all check
+                        types.
   --no-save             Use to bypass saving an experiment.
   --no-plots            Use to bypass plotting an experiment.
-  --plot-only           Plot the result of a previously saved experiment. Don't compute another test.
+  --plot-only           Plot the result of a previously saved experiment.
+                        Don't compute another test.
+  --no-glodyne          In case you don't have the METIS package installed,
+                        you can run the code without the GloDyNE method
+                        (overrides the --all flag).
 ```
 
 

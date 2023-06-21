@@ -69,6 +69,12 @@ parser.add_argument(
     help="Plot the result of a previously saved experiment. Don't compute another test.",
     action="store_true",
 )
+parser.add_argument(
+    "--no-glodyne",
+    help="In case you don't have the METIS package installed, you can run the code without the GloDyNE method (overrides the --all flag).",
+    action="store_true",
+)
+
 
 args = parser.parse_args()
 
@@ -117,6 +123,12 @@ if run_all:
         "power-static",
     ]
     check_type_list = ["community", "graph", "node"]
+
+no_glodyne = args.no_glodyne
+methods_upper = [method.upper() for method in methods]
+if no_glodyne and "GLODYNE" in methods_upper:
+    methods.pop(methods_upper.index("GLODYNE"))
+
 
 # Generated network parameters
 T = 2  # Number of time points
