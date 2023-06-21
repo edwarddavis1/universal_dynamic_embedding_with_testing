@@ -6,6 +6,7 @@ from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 import scipy.sparse as sparse
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from embedding_functions import *
 
 # %%
@@ -399,3 +400,84 @@ plot_diss_mat(dists)
 #     airport_of_interest), dpi=300, bbox_inches="tight")
 
 # %%
+# Compute the left embedding to plot
+XAs, YAs = regularised_ULSE(
+    As,
+    d,
+    sparse_matrix=True,
+    regulariser="auto",
+    flat=False,
+    verbose=True,
+    return_left=True,
+)
+# %%
+fig, axs = plt.subplots(1, 3, figsize=(15, 6))
+
+emb = XAs
+
+colour_dict = {
+    "EU": "#5FC613",
+    "AS": "#EA8615",
+    "NA": "#C686E9",
+    "SA": "#00CAFF",
+    "AF": "#FF5C81",
+    "OC": "#2E9072",
+}
+Z_col = [colour_dict[cont] for cont in Z]
+
+axs[0].scatter(emb[:, 0], emb[:, 1], c=Z_col, s=10)
+axs[1].scatter(emb[:, 2], emb[:, 3], c=Z_col, s=10)
+axs[2].scatter(emb[:, 3], emb[:, 4], c=Z_col, s=10)
+
+axs[0].set_xlabel("Dimension 1")
+axs[0].set_ylabel("Dimension 2")
+axs[1].set_xlabel("Dimension 3")
+axs[1].set_ylabel("Dimension 4")
+axs[2].set_xlabel("Dimension 4")
+axs[2].set_ylabel("Dimension 5")
+
+
+# Discrete legend for each continent
+full_name_dict = {
+    "EU": "Europe",
+    "AS": "Asia",
+    "NA": "North America",
+    "SA": "South America",
+    "AF": "Africa",
+    "OC": "Oceania",
+}
+legend_elements = [
+    Line2D(
+        [0],
+        [0],
+        marker="o",
+        color="w",
+        label=full_name_dict[cont],
+        markerfacecolor=colour_dict[cont],
+        markersize=10,
+    )
+    for cont in colour_dict.keys()
+]
+
+# Place legend outside and above of plot horizontally
+axs[0].legend(
+    handles=legend_elements,
+    title="Continent",
+    title_fontsize=14,
+    loc="upper center",
+    bbox_to_anchor=(1.78, 1.2),
+    ncol=6,
+    fontsize=14,
+)
+
+fig.subplots_adjust(wspace=0.3)
+
+axs[0].grid(alpha=0.5)
+axs[1].grid(alpha=0.5)
+axs[2].grid(alpha=0.5)
+
+fig.patch.set_facecolor("white")
+
+# save
+save_dir = "saved_flight_plots/"
+plt.savefig(save_dir + "left_embedding_plot.png", bbox_inches="tight")
