@@ -1,5 +1,6 @@
 # %%
 """Originally cloned from https://github.com/iggallagher/Miscellaneous"""
+import time
 from math import comb
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
@@ -481,3 +482,47 @@ fig.patch.set_facecolor("white")
 # save
 save_dir = "saved_flight_plots/"
 plt.savefig(save_dir + "left_embedding_plot.png", bbox_inches="tight")
+
+# %%
+# Compare computation times for different skip-gram dynamic embeddings
+# GloDyNE can only deal with binary matrices, for the sake of comparison, force As to be binary
+for t in range(T):
+    As[t] = As[t].sign()
+
+
+# %%
+t0 = time.time()
+d = 5
+YAs = independent_n2v(
+    As, d, flat=False, walklen=20, window=3, num_walks=20, verbose=False
+)
+t1 = time.time()
+print("Independent n2v took {} seconds".format(t1 - t0))
+# %%
+t0 = time.time()
+d = 5
+YAs = unfolded_n2v(
+    As,
+    d,
+    flat=False,
+    walklen=20,
+    window=3,
+    num_walks=20,
+    verbose=False,
+    sparse_matrix=True,
+)
+t1 = time.time()
+print("Unfolded n2v took {} seconds".format(t1 - t0))
+# %%
+t0 = time.time()
+d = 5
+YAs = GloDyNE(
+    As,
+    d,
+    walklen=20,
+    window=3,
+    num_walks=20,
+    sparse_matrix=True,
+)
+t1 = time.time()
+print("GloDyNE took {} seconds".format(t1 - t0))

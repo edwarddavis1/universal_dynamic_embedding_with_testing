@@ -1,4 +1,5 @@
 # %%
+from scipy import stats
 import os
 import sys
 import argparse
@@ -48,6 +49,12 @@ parser.add_argument(
     type=int,
     default=2000,
     help="Number of nodes in each power experiment (reccomend at least 2000)",
+)
+parser.add_argument(
+    "--d",
+    type=int,
+    default=0,
+    help="Number of dimensions to embed into. Default embeds the at rank of the corresponding embedding matrix.",
 )
 parser.add_argument(
     "--all",
@@ -135,6 +142,9 @@ T = 2  # Number of time points
 n_normal = args.n  # Number of nodes in each (non-power) experiment
 n_power = args.n_power  # Number of nodes in each power experiment
 
+# Number of dimensions to embed into. If zero, embed at the rank of the embedding matrix
+d_input = args.d
+
 # If the generated network is moving, control how much it moves
 move_prob = 0.53  # For moving system. Prob is initially 0.5
 power_move_prob = 0.97  # For power-moving system. Prob is initially 1
@@ -169,8 +179,13 @@ if not plot_only:
                     exp, T_for_exp, move_prob=move_prob, power_move_prob=power_move_prob
                 )
 
-                # Get the rank of the embedding matrix for each method
-                d_for_method = get_embedding_dimension(B, method)
+                if d_input == 0:
+                    # Embed at the rank of the embedding matrix for each method
+                    d_for_method = get_embedding_dimension(B, method)
+                else:
+                    # Embed at the specified dimension
+                    d_for_method = d_input
+
                 dim_for_embedding_dict[method] = d_for_method
 
             p_hat_list = []
@@ -402,8 +417,11 @@ for experiment_to_plot in experiments_to_run:
                 correct_distribution = "uniform"
 
             power_threshold = 0.04
+            # Kolmogorov-Smirnov test to test if p-values are uniform
+            uniform_pvalue = stats.kstest(roc, "uniform", args=(0, 1)).pvalue
 
-            if power >= 0.05 - power_threshold and power <= 0.05 + power_threshold:
+            if uniform_pvalue >= 0.05:
+                # if power >= 0.05 - power_threshold and power <= 0.05 + power_threshold:
                 if correct_distribution == "uniform":
                     # if the distribution is approximately uniform when it should be uniform
                     colour_for_plot = GREEN

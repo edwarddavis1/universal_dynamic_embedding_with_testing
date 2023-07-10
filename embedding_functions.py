@@ -623,7 +623,7 @@ def test_temporal_displacement_two_times(ya, n, n_sim=1000):
 
     ya: (numpy array (nT, d) Entire dynamic embedding.
     n: (int) number of nodes
-    changepoint (int > radius, <= T-radius)
+    changepoint: (int) time point at which to split the embedding
     n_sim: (int) number of permuted test statistics computed.
     """
 
