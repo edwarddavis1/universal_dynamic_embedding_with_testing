@@ -169,7 +169,7 @@ if not plot_only:
                 regulariser = "auto"  # For URLSE. This setting works well on power-distributed examples
             else:
                 n = n_normal
-                regulariser = 10
+                regulariser = "auto"
 
             # Select the embedding dimension for each method to be the rank of the embedding matrix
             dim_for_embedding_dict = {}
