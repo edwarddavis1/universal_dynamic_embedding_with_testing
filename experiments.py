@@ -96,6 +96,7 @@ save_dir_plots = "saved_experiment_plots/"  # Directory to save plots in
 if not os.path.exists(save_dir_plots):
     os.makedirs(save_dir_plots)
 
+
 show_plots = not args.no_plots
 run_all = args.all
 plot_only = args.plot_only
@@ -144,6 +145,10 @@ n_power = args.n_power  # Number of nodes in each power experiment
 
 # Number of dimensions to embed into. If zero, embed at the rank of the embedding matrix
 d_input = args.d
+if d_input != 0:
+    save_addon = "_d=" + str(d_input)
+else:
+    save_addon = ""
 
 # If the generated network is moving, control how much it moves
 move_prob = 0.53  # For moving system. Prob is initially 0.5
@@ -320,6 +325,7 @@ if not plot_only:
                             + check_type
                             + "_"
                             + str(method)
+                            + save_addon
                             + ".csv"
                         )
 
@@ -359,7 +365,11 @@ for experiment_to_plot in experiments_to_run:
         df_list = []
         for dirpath, dirnames, filenames in os.walk(save_dir_dfs):
             for df_file in filenames:
-                file_method = df_file.split("_")[2][:-4]
+                if save_addon not in df_file:
+                    continue
+
+                file_save_addon = "_" + df_file.split("_")[3][:-4]
+                file_method = df_file.split("_")[2]
                 file_check_type = df_file.split("_")[1]
                 file_system = df_file.split("_")[0]
 
@@ -367,9 +377,10 @@ for experiment_to_plot in experiments_to_run:
                     file_system == experiment_to_plot in df_file
                     and file_check_type == experiment_check_type
                     and file_method in methods
+                    and save_addon == file_save_addon
                 ):
                     df_list.append(pd.read_csv(save_dir_dfs + df_file))
-                    methods_from_save.append(df_file.split("_")[-1].split(".")[0])
+                    methods_from_save.append(file_method)
 
         # Plot p-value cumulative distribution
         print(
@@ -471,6 +482,7 @@ for experiment_to_plot in experiments_to_run:
                 + experiment_check_type
                 + "_"
                 + method
+                + save_addon
                 + ".png",
                 bbox_inches="tight",
             )
