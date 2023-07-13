@@ -368,8 +368,13 @@ for experiment_to_plot in experiments_to_run:
                 if save_addon not in df_file:
                     continue
 
-                file_save_addon = "_" + df_file.split("_")[3][:-4]
-                file_method = df_file.split("_")[2]
+                if len(df_file.split("_")) == 3:
+                    file_save_addon = ""
+                    file_method = df_file.split("_")[2][:-4]
+                else:
+                    file_save_addon = "_" + df_file.split("_")[3][:-4]
+                    file_method = df_file.split("_")[2]
+
                 file_check_type = df_file.split("_")[1]
                 file_system = df_file.split("_")[0]
 
