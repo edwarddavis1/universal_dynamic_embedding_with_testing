@@ -1,5 +1,7 @@
 # Universal Stable Dynamic Graph Embedding with Robust Hypothesis Testing
 
+This repository contains methods an experiments from the paper: [A Simple and Powerful Framework for Stable Dynamic Network Embedding](https://arxiv.org/abs/2311.09251). 
+
 This repository implements a collection of spectral and skip-gram dynamic network embedding methods. This repo compares how well different methods can encode planted structure in simulated dynamic networks through the use of a hypothesis test. The methods are also applied to a dynamic flight network to see whether they can encode both the periodic nature of the network, as well as represent the disruption caused by the COVID-19 pandemic on air traffic.
 
 ## Getting Started
