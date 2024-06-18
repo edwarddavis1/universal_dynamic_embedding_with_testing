@@ -9,3 +9,5 @@ pycountry==22.3.5
 scikit_learn==1.2.1
 scipy==1.8.1
 tqdm==4.64.1
+plotly==5.22.0
+nbformat==5.10.4

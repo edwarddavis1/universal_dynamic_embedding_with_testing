@@ -1,4 +1,6 @@
 # import networkx as nx
+import plotly.express as px
+import pandas as pd
 import numpy as np
 from scipy import sparse
 import nodevectors
@@ -649,3 +651,32 @@ def test_temporal_displacement_two_times(ya, n, n_sim=1000):
     # Compute permutation test p-value
     p_hat = 1 / n_sim * np.sum(t_stars >= t_obs)
     return p_hat
+
+
+
+def plot_embedding(ya, n, T, tau, return_df=False, title=None):
+    if len(ya.shape) == 3:
+        ya = ya.reshape((n * T, -1))
+
+    yadf = pd.DataFrame(ya[:, 0:2])
+    yadf.columns = ["Dimension {}".format(i + 1) for i in range(yadf.shape[1])]
+    yadf["Time"] = np.repeat([t for t in range(T)], n)
+    yadf["Community"] = list(tau) * T
+    yadf["Community"] = yadf["Community"].astype(str)
+    pad_x = (max(ya[:, 0]) - min(ya[:, 0])) / 50
+    pad_y = (max(ya[:, 1]) - min(ya[:, 1])) / 50
+    fig = px.scatter(
+        yadf,
+        x="Dimension 1",
+        y="Dimension 2",
+        color="Community",
+        animation_frame="Time",
+        range_x=[min(ya[:, 0]) - pad_x, max(ya[:, 0]) + pad_x],
+        range_y=[min(ya[:, 1]) - pad_y, max(ya[:, 1]) + pad_y],
+    )
+    if title:
+        fig.update_layout(title=title)
+
+    fig.show()
+    if return_df:
+        return yadf
